@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateDepartmentsTable extends Migration
+class CreateTypeOperationsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -12,10 +12,8 @@ class CreateDepartmentsTable extends Migration
      * @return void
      */
     public function up() {
-        Schema::create('departments', function(Blueprint $table) {
+        Schema::create('type_operations', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->unsignedBigInteger('country_id');
-            $table->foreign('country_id')->references('id')->on('countries')->onDelete('cascade');
             $table->string('name');
             $table->char('code');
             $table->timestamps();
@@ -28,6 +26,6 @@ class CreateDepartmentsTable extends Migration
      * @return void
      */
     public function down() {
-        Schema::dropIfExists('departments');
+        Schema::dropIfExists('type_operations');
     }
 }
