@@ -4,12 +4,10 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateResolutionsTable extends Migration
+return new class extends Migration
 {
     /**
      * Run the migrations.
-     *
-     * @return void
      */
     public function up() {
         Schema::create('resolutions', function(Blueprint $table) {
@@ -32,10 +30,8 @@ class CreateResolutionsTable extends Migration
     
     /**
      * Reverse the migrations.
-     *
-     * @return void
      */
     public function down() {
         Schema::dropIfExists('resolutions');
     }
-}
+};

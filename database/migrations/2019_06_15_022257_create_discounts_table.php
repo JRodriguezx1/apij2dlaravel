@@ -4,12 +4,10 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateDiscountsTable extends Migration
+return new class extends Migration
 {
     /**
      * Run the migrations.
-     *
-     * @return void
      */
     public function up() {
         Schema::create('discounts', function(Blueprint $table) {
@@ -22,10 +20,8 @@ class CreateDiscountsTable extends Migration
     
     /**
      * Reverse the migrations.
-     *
-     * @return void
      */
     public function down() {
         Schema::dropIfExists('discounts');
     }
-}
+};

@@ -4,12 +4,10 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateTypeItemIdentificationsTable extends Migration
+return new class extends Migration
 {
     /**
      * Run the migrations.
-     *
-     * @return void
      */
     public function up() {
         Schema::create('type_item_identifications', function(Blueprint $table) {
@@ -23,10 +21,8 @@ class CreateTypeItemIdentificationsTable extends Migration
     
     /**
      * Reverse the migrations.
-     *
-     * @return void
      */
     public function down() {
         Schema::dropIfExists('type_item_identifications');
     }
-}
+};
