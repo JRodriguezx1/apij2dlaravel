@@ -23,6 +23,9 @@ class ConfigurationSeeder extends Seeder
         'type_organizations' => [
             'columns' => 'id, name, code, @created_at, @updated_at',
         ],
+        'events' => [
+            'columns' => 'id, name, code, @created_at, @updated_at',
+        ],
         'countries' => [
             'columns' => 'id, name, code, @created_at, @updated_at',
         ],
@@ -30,9 +33,48 @@ class ConfigurationSeeder extends Seeder
             'columns' => 'id, country_id, name, code, @created_at, @updated_at',
         ],
         'municipalities' => [
-            'columns' => 'id, department_id, name, code, @created_at, @updated_at',
+            'columns' => 'id, department_id, name, code, codefacturador, @created_at, @updated_at',
         ],
         'type_document_identifications' => [
+            'columns' => 'id, name, code, @created_at, @updated_at',
+        ],
+        'type_contracts' => [
+            'columns' => 'id, name, code, @created_at, @updated_at',
+        ],
+        'type_workers' => [
+            'columns' => 'id, name, code, @created_at, @updated_at',
+        ],
+        'type_disabilities' => [
+            'columns' => 'id, name, code, @created_at, @updated_at',
+        ],
+        'type_overtime_surcharges' => [
+            'columns' => 'id, name, code, percentage, @created_at, @updated_at',
+        ],
+        'type_law_deductions' => [
+            'columns' => 'id, name, code, percentage, @created_at, @updated_at',
+        ],
+        'sub_type_workers' => [
+            'columns' => 'id, name, code, @created_at, @updated_at',
+        ],
+        'payroll_type_document_identifications' => [
+            'columns' => 'id, name, code, @created_at, @updated_at',
+        ],
+        'health_type_document_identifications' => [
+            'columns' => 'id, name, code, @created_at, @updated_at',
+        ],
+        'health_type_users' => [
+            'columns' => 'id, name, code, @created_at, @updated_at',
+        ],
+        'health_contracting_payment_methods' => [
+            'columns' => 'id, name, code, @created_at, @updated_at',
+        ],
+        'health_coverages' => [
+            'columns' => 'id, name, code, @created_at, @updated_at',
+        ],
+        'payroll_periods' => [
+            'columns' => 'id, name, code, @created_at, @updated_at',
+        ],
+        'type_payroll_adjust_notes' => [
             'columns' => 'id, name, code, @created_at, @updated_at',
         ],
         'taxes' => [
@@ -71,10 +113,31 @@ class ConfigurationSeeder extends Seeder
         'type_operations' => [
             'columns' => 'id, name, code, @created_at, @updated_at',
         ],
+        'health_type_operations' => [
+            'columns' => 'id, name, code, @created_at, @updated_at',
+        ],
         'type_environments' => [
             'columns' => 'id, name, code, @created_at, @updated_at',
         ],
+        'credit_note_discrepancy_responses' => [
+            'columns' => 'id, name, code, @created_at, @updated_at',
+        ],
+        'debit_note_discrepancy_responses' => [
+            'columns' => 'id, name, code, @created_at, @updated_at',
+        ],
+        'type_discounts' => [
+            'columns' => 'id, name, code, @created_at, @updated_at',
+        ],
         'languages' => [
+            'columns' => 'id, name, code, @created_at, @updated_at',
+        ],
+        'type_rejections' => [
+            'columns' => 'id, name, code, @created_at, @updated_at',
+        ],
+        'type_generation_transmitions' => [
+            'columns' => 'id, name, code, @created_at, @updated_at',
+        ],
+        'incoterms' => [
             'columns' => 'id, name, code, @created_at, @updated_at',
         ],
     ];
