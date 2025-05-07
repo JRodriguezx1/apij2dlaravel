@@ -9,7 +9,7 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up() {
+    public function up(): void {
         Schema::create('software', function(Blueprint $table) {
             $table->bigIncrements('id');
             $table->unsignedBigInteger('company_id');
@@ -24,7 +24,7 @@ return new class extends Migration
     /**
      * Reverse the migrations.
      */
-    public function down() {
+    public function down(): void {
         Schema::dropIfExists('software');
     }
 };

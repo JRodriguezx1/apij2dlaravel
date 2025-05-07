@@ -9,7 +9,7 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up() {
+    public function up(): void {
         Schema::create('type_item_identifications', function(Blueprint $table) {
             $table->bigIncrements('id');
             $table->string('name');
@@ -22,7 +22,7 @@ return new class extends Migration
     /**
      * Reverse the migrations.
      */
-    public function down() {
+    public function down(): void {
         Schema::dropIfExists('type_item_identifications');
     }
 };
