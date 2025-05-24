@@ -27,7 +27,7 @@ Route::get('/getconfigcompanies', [ConfigurationController::class, 'index']);
 Route::prefix('/ubl2.1')->group(function(){
     //configuracion
     Route::prefix('/config')->group(function(){
-        Route::post('{nit]/{dv?}', [ConfigurationController::class, 'store']); //crear configurar compañia
+        Route::post('{nit}/{dv?}', [ConfigurationController::class, 'store']); //crear configurar compañia
 
         Route::put('/software', [ConfigurationController::class, 'storeSoftware']);
         Route::put('/softwarepayroll', [ConfigurationController::class, 'storeSoftware']);

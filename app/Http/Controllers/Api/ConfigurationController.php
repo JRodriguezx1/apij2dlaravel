@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use app\Http\Requests\Api\ConfigurationRequest;
+use App\Http\Requests\Api\ConfigurationRequest;
 use App\Models\Company;
 use Illuminate\Support\Facades\DB;
 
@@ -38,6 +38,11 @@ class ConfigurationController extends Controller
         } catch (\Throwable $th) {
             //throw $th;
         }*/
+        return response()->json([
+        'all' => $request->all(),
+        'method' => $request->method()
+        ]);
+        
     }
 
     /**
