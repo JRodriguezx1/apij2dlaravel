@@ -1,9 +1,12 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api;
 
-use App\Models\Company;
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use app\Http\Requests\Api\ConfigurationRequest;
+use App\Models\Company;
+use Illuminate\Support\Facades\DB;
 
 class ConfigurationController extends Controller
 {
@@ -27,9 +30,14 @@ class ConfigurationController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(ConfigurationRequest $request, $nit, $dv = null)
     {
-        //
+        /*DB::transaction();
+        try {
+            
+        } catch (\Throwable $th) {
+            //throw $th;
+        }*/
     }
 
     /**
