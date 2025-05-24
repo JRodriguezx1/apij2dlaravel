@@ -21,3 +21,13 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 
 Route::get('/getconfigcompanies', [ConfigurationController::class, 'index']);
+//route::apiResource()  Route::apiResource() ya incluye internamente todos los verbos HTTP necesarios para una API RESTful GET	/api/productos	index, POST	/api/productos	store, GET	/api/productos/{id}	show, PUT/PATCH	/api/productos/{id}	update, DELETE	/api/productos/{id}	destroy
+
+Route::prefix('/ubl2.1')->group(function(){
+    //configuracion
+    Route::prefix('/config')->group(function(){
+        Route::post('{nit]/{dv?}', [ConfigurationController::class, 'store']); //crear configurar compañia
+
+    });
+    
+});
