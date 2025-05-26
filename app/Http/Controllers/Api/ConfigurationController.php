@@ -61,7 +61,8 @@ class ConfigurationController extends Controller
                 'api_token' => hash('sha256', $password) //GENERA TOKEN
                 ]);
 
-            //$user->api_token = hash('sha256', $password); //GENERA TOKEN
+            $user->api_token = hash('sha256', $password); //GENERA TOKEN
+            $user->save();
 
             if(isset($request->type_plan_id))
                     $start_plan_date = Carbon::now()->format('Y-m-d H:i');
