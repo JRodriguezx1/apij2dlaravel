@@ -142,7 +142,7 @@ class ConfigurationController extends Controller
     /**
      * Display the specified resource.
      */
-    public function storeSoftware(Request $request)
+    public function storeSoftware(Request $request):string
     {
         //
         $user = auth()->user()->company;  //obtengo usuario autenticado y luego su compañia
@@ -153,9 +153,10 @@ class ConfigurationController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Company $company)
+    public function edit(Company $company):array
     {
         //
+        return [];
     }
 
     /**
