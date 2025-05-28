@@ -3,12 +3,18 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\ConfigurationCertificateRequest;
+use App\Http\Requests\Api\ConfigurationEnvironmentRequest;
 use Illuminate\Http\Request;
 use App\Http\Requests\Api\ConfigurationRequest;
+use App\Http\Requests\Api\ConfigurationResolutionRequest;
+use App\Http\Requests\Api\ConfigurationSoftwareRequest;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use App\Models\Company;
+use App\Models\Software;
 use App\Models\User;
+use Exception;
 
 class ConfigurationController extends Controller
 {
@@ -143,27 +149,75 @@ class ConfigurationController extends Controller
     /**
      * Display the specified resource.
      */
-    public function storeSoftware(Request $request):string
+    public function storeSoftware(ConfigurationSoftwareRequest $request):array
     {
-        //
-        $user = auth()->user()->company;  //obtengo usuario autenticado y luego su compañia
+        //$user = auth()->user()->company;  //obtengo usuario autenticado y luego su compañia
+
+        $s = auth()->user()->company->software;  //obtengo usuario autenticado, luego su compañia y despues su software
+            if(is_null($s)){  //si no hay software lo crea
+                $software = auth()->user()->company->software()->create(
+                    [
+                    'identifier' => $request->id ?? '',
+                    'pin' => $request->pin ?? '',
+                    'url' => $request->url ?? 'https://vpfe-hab.dian.gov.co/WcfDianCustomerServices.svc',
+                    'url_payroll' => $request->urlpayroll ?? 'https://vpfe-hab.dian.gov.co/WcfDianCustomerServices.svc',
+                    'identifier_payroll' => $request->idpayroll ?? '',
+                    'pin_payroll' => $request->pinpayroll ?? '',
+                    //'url_sd' => $request->urlsd ?? 'https://vpfe-hab.dian.gov.co/WcfDianCustomerServices.svc',
+                    //'identifier_sd' => $request->idsd ?? '',
+                    //'pin_sd' => $request->pinsd ?? '',
+                    'url_eqdocs' => $request->urleqdocs ?? 'https://vpfe-hab.dian.gov.co/WcfDianCustomerServices.svc',
+                    'identifier_eqdocs' => $request->ideqdocs ?? '',
+                    'pin_eqdocs' => $request->pineqdocs ?? '',
+                    ]
+                );
+            }else{
+                $software = auth()->user()->company->software()->update(
+                    [
+                    'identifier' => $request->id ?? $s->identifier,
+                    'pin' => $request->pin ?? $s->pin,
+                    'url' => $request->url ?? 'https://vpfe-hab.dian.gov.co/WcfDianCustomerServices.svc',
+                    'url_payroll' => $request->urlpayroll ?? 'https://vpfe-hab.dian.gov.co/WcfDianCustomerServices.svc',
+                    'identifier_payroll' => $request->idpayroll ?? $s->identifier_payroll,
+                    'pin_payroll' => $request->pinpayroll ?? $s->pin_payroll,
+                    //'url_sd' => $request->urlsd ?? 'https://vpfe-hab.dian.gov.co/WcfDianCustomerServices.svc',
+                    //'identifier_sd' => $request->idsd ?? $s->identifier_sd,
+                    //'pin_sd' => $request->pinsd ?? $s->pin_sd,
+                    'url_eqdocs' => $request->urleqdocs ?? 'https://vpfe-hab.dian.gov.co/WcfDianCustomerServices.svc',
+                    'identifier_eqdocs' => $request->ideqdocs ?? '',
+                    'pin_eqdocs' => $request->pineqdocs ?? '',
+                    ]
+                );
+            }
+
+            $s = Software::where('company_id', auth()->user()->company->id)->firstOrFail(); //obtenemos el software segun el id de la compañia
+            return [
+                'success' => true,
+                'message' => 'Software creado/actualizado con éxito',
+                'software' => $s,
+            ];
         
-        return "desdes storeSoftware";
     }
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Company $company):array
+    public function storeCertificate(ConfigurationCertificateRequest $request):array
     {
-        //
+        if (!base64_decode($request->certificate, true)) {
+                throw new Exception('The given data was invalid.');
+            }
+           
+        if (!openssl_pkcs12_read($certificateBinary = base64_decode($request->certificate), $certificate, $request->password)) {
+            throw new Exception('The certificate could not be read.');
+        }
         return [];
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Company $company)
+    public function storeResolution(ConfigurationResolutionRequest $request)
     {
         //
     }
@@ -171,7 +225,7 @@ class ConfigurationController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Company $company)
+    public function storeEnvironment(ConfigurationEnvironmentRequest $request)
     {
         //
     }
