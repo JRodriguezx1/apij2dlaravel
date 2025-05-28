@@ -21,7 +21,16 @@ class InvoiceRequest extends FormRequest
      */
     public function rules(): array
     {
-        //PROCESAMIENTO ANTES DE LAS REGLAS.
+        //PREPROCESAMIENTO ANTES DE LAS REGLAS.
+        //(buscar la resolución específica que coincida con las tres condiciones cuando las tres están disponibles.) las 3 se enviaran obligatorias
+         // Obtener todas las resoluciones de la compañía una sola vez
+        $resolutions = auth()->user()->company->resolutions;
+
+        // Buscar directamente la resolución que coincide con los tres valores
+        $this->resolution = $resolutions->firstWhere(function ($res) {
+            return $res->type_document_id == $this->type_document_id && $res->resolution == $this->resolution_number && $res->prefix == $this->prefix;
+        });
+        
         
         return [
             //
@@ -95,6 +104,13 @@ class InvoiceRequest extends FormRequest
                 'in:1',
                 'exists:type_documents,id',
                 //new ResolutionSetting(),
+            ],
+
+             // Consecutivo
+            'number' => [
+                'required',
+                'integer',
+                'between:' . optional($this->resolution)->from . ',' . optional($this->resolution)->to,
             ],
         ];
     }
