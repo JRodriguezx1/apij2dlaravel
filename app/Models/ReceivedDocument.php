@@ -1,11 +1,11 @@
 <?php
 
-namespace App;
+namespace App\Models;
 
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Model;
 use DateTime;
-use App\TypeDocument;
+//use App\TypeDocument;
 
 
 class ReceivedDocument extends Model

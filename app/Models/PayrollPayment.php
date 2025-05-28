@@ -1,8 +1,8 @@
 <?php
 
-namespace App;
+namespace App\Models;
 
-use App\PaymentMethod;
+//use App\PaymentMethod;
 use Illuminate\Database\Eloquent\Model;
 
 class PayrollPayment extends Model

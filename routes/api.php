@@ -5,6 +5,8 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\ConfigurationController;
+use App\Http\Controllers\Api\InvoiceController;
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -46,6 +48,11 @@ Route::middleware('auth.token')->group(function(){
         //configuracion
         Route::prefix('/config')->group(function(){
             Route::put('/software', [ConfigurationController::class, 'storeSoftware']);
+        });
+
+        //Invoice
+        Route::prefix('/invoince')->group(function(){
+            Route::post('/{testSetId}', [InvoiceController::class, 'testSetStore']);
         });
     });
 });

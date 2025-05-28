@@ -1,14 +1,14 @@
 <?php
 
-namespace App;
+namespace App\Models;
 
-use App\TypeWorker;
-use App\SubTypeWorker;
-use App\PayrollTypeDocumentIdentification;
-use App\Municipality;
-use App\Department;
-use App\Country;
-use App\TypeContract;
+//use App\TypeWorker;
+//use App\SubTypeWorker;
+//use App\PayrollTypeDocumentIdentification;
+//use App\Municipality;
+//use App\Department;
+//use App\Country;
+//use App\TypeContract;
 use Illuminate\Database\Eloquent\Model;
 
 class Worker extends Model
