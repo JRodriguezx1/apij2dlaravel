@@ -11,7 +11,7 @@ class ConfigurationCertificateRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -22,7 +22,8 @@ class ConfigurationCertificateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'certificate' => 'required|string',
+            'password' => 'required|string',
         ];
     }
 }

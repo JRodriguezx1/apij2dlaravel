@@ -11,7 +11,7 @@ class ConfigurationSoftwareRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -22,7 +22,18 @@ class ConfigurationSoftwareRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'id' => 'nullable|string',
+            'pin' => 'nullable|required_with:id|numeric|digits:5',
+            'url' => 'nullable|string|url',
+            'idpayroll' => 'nullable|string',
+            'pinpayroll' => 'nullable|required_with:idpayroll|numeric|digits:5',
+            'urlpayroll' => 'nullable|string|url',
+            //'idsd' => 'nullable|string',
+            //'pinsd' => 'nullable|required_with:idsd|numeric|digits:5',
+            //'urlsd' => 'nullable|string|url',
+            'ideqdocs' => 'nullable|string',
+            'pineqdocs' => 'nullable|required_with:ideqdocs|numeric|digits:5',
+            'urleqdocs' => 'nullable|string|url',
         ];
     }
 }
