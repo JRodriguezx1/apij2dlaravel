@@ -202,16 +202,37 @@ class ConfigurationController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function storeCertificate(ConfigurationCertificateRequest $request):array
+    public function storeCertificate(ConfigurationCertificateRequest $request)
     {
-        if (!base64_decode($request->certificate, true)) {
+        try{
+            if(!base64_decode($request->certificate, true)){
                 throw new Exception('The given data was invalid.');
             }
-           
-        if (!openssl_pkcs12_read($certificateBinary = base64_decode($request->certificate), $certificate, $request->password)) {
-            throw new Exception('The certificate could not be read.');
+            
+            if(!openssl_pkcs12_read($certificateBinary = base64_decode($request->certificate), $certificate, $request->password)){
+                throw new Exception('The certificate could not be read.');
+            }
+        }catch (Exception $e){
+            if(false == ($error = openssl_error_string())){
+                return response([
+                    'message' => $e->getMessage(),
+                    'errors' => [
+                        'certificate' => 'The base64 encoding is not valid.',
+                    ],
+                ], 422);
+            }
+
+            return response([
+                'message' => $e->getMessage(),
+                'errors' => [
+                    'certificate' => $error,
+                    'password' => $error,
+                ],
+            ], 422);
         }
-        return [];
+
+        auth()->user()->company->certificate()->delete();
+
     }
 
     /**
