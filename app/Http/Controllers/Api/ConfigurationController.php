@@ -15,6 +15,7 @@ use App\Models\Company;
 use App\Models\Software;
 use App\Models\User;
 use Exception;
+use Illuminate\Support\Facades\Storage;
 
 class ConfigurationController extends Controller
 {
@@ -212,7 +213,7 @@ class ConfigurationController extends Controller
             if(!openssl_pkcs12_read($certificateBinary = base64_decode($request->certificate), $certificate, $request->password)){
                 throw new Exception('The certificate could not be read.');
             }
-        }catch (Exception $e){
+        }catch(Exception $e){
             if(false == ($error = openssl_error_string())){
                 return response([
                     'message' => $e->getMessage(),
@@ -231,8 +232,35 @@ class ConfigurationController extends Controller
             ], 422);
         }
 
-        auth()->user()->company->certificate()->delete();
+        auth()->user()->company->certificate()->delete();  //obtengo el usuario autenticado, luiego su compañia despues el certificado asociado y elimino
+        $company = auth()->user()->company;  //obtengo la compañia del usuario
+        $name = "{$company->identification_number}{$company->dv}.p12";  //nombre del certificado = {nit+dv}.p12
+        Storage::put("certificates/{$name}", $certificateBinary);  //se guarda el certificado en base 64 en local: storage/app/certificates/nombre.p12
 
+        $pfxContent = file_get_contents(storage_path("app/certificates/".$name));  //lee el archivo local recien guardado
+        if(!openssl_pkcs12_read($pfxContent, $x509certdata, $request->password)){  //si no se puede leer el archivo, entra y muestra error
+            throw new Exception('The certificate could not be read.');
+        }
+        else{
+            $CertPriv   = array();
+            $CertPriv   = openssl_x509_parse(openssl_x509_read($x509certdata['cert']));
+            $PrivateKey = $x509certdata['pkey'];
+            $pub_key = openssl_pkey_get_public($x509certdata['cert']);
+            $keyData = openssl_pkey_get_details($pub_key);
+            $PublicKey  = $keyData['key'];
+            $expiration_date = date('Y/m/d H:i:s', $CertPriv['validTo_time_t']);
+        }
+
+        $certificate = auth()->user()->company->certificate()->create([
+            'name'=>$name,
+            'password'=>$request->password,
+            'expiration_date'=>$expiration_date
+        ]);
+        return [
+                'success' => true,
+                'message' => 'Certificado creado con éxito',
+                'certificado' => $certificate,
+            ];
     }
 
     /**
@@ -240,7 +268,31 @@ class ConfigurationController extends Controller
      */
     public function storeResolution(ConfigurationResolutionRequest $request)
     {
-        //
+        if($request->delete_all_type_resolutions){ //si delete_all_type_resolutions es true se elimina las resoluciones que tengan el mismo tipo de documento como prefix: fv, factura electronica de venta
+                $resolution = auth()->user()->company->resolutions()->where('type_document_id', $request->type_document_id)->get();  //obtengo las resoluciones con el mismo tipo de docuemtno prefijo fv
+                if(count($resolution) > 0)
+                    foreach($resolution as $r)
+                        $r->delete();  //eliminio las resoluciones con el mismo prefijo o tipo de factura fv
+        }
+
+        $resolution = auth()->user()->company->resolutions()->updateOrCreate([  // si cumple las tres condiciones, tipo de documento, resolution y prefix actualiza de lo contrario crea nuevo registro
+                'type_document_id' => $request->type_document_id,
+                'resolution' => $request->resolution,
+                'prefix' => $request->prefix,
+            ], [
+                'resolution_date' => $request->resolution_date,
+                'technical_key' => $request->technical_key,
+                'from' => $request->from,
+                'to' => $request->to,
+                'date_from' => $request->date_from,
+                'date_to' => $request->date_to,
+            ]);
+
+        return [
+                'success' => true,
+                'message' => 'Resolución creada/actualizada con éxito',
+                'resolution' => $resolution,
+            ];
     }
 
     /**
@@ -249,5 +301,38 @@ class ConfigurationController extends Controller
     public function storeEnvironment(ConfigurationEnvironmentRequest $request)
     {
         //
+        if(!$request->type_environment_id)
+            $request->type_environment_id = auth()->user()->company->type_environment_id;
+        if(!$request->payroll_type_environment_id)
+            $request->payroll_type_environment_id = auth()->user()->company->payroll_type_environment_id;
+        if(!$request->eqdocs_type_environment_id)
+            $request->eqdocs_type_environment_id = auth()->user()->company->eqdocs_type_environment_id;
+
+        auth()->user()->company->update([
+            'type_environment_id' => $request->type_environment_id,
+            'payroll_type_environment_id' => $request->payroll_type_environment_id,
+            'eqdocs_type_environment_id' => $request->eqdocs_type_environment_id,
+        ]);
+
+        if ($request->type_environment_id)
+            if ($request->type_environment_id == 1)
+              auth()->user()->company->software->update(['url' => 'https://vpfe.dian.gov.co/WcfDianCustomerServices.svc',]);
+            else
+               auth()->user()->company->software->update(['url' => 'https://vpfe-hab.dian.gov.co/WcfDianCustomerServices.svc',]);
+
+        if ($request->payroll_type_environment_id)
+            if ($request->payroll_type_environment_id == 1)
+              auth()->user()->company->software->update(['url_payroll' => 'https://vpfe.dian.gov.co/WcfDianCustomerServices.svc',]);
+            else
+               auth()->user()->company->software->update(['url_payroll' => 'https://vpfe-hab.dian.gov.co/WcfDianCustomerServices.svc',]);
+
+        if ($request->eqdocs_type_environment_id)
+            if ($request->eqdocs_type_environment_id == 1)
+              auth()->user()->company->software->update(['url_eqdocs' => 'https://vpfe.dian.gov.co/WcfDianCustomerServices.svc',]);
+            else
+               auth()->user()->company->software->update(['url_eqdocs' => 'https://vpfe-hab.dian.gov.co/WcfDianCustomerServices.svc',]);
+    
+        return ['message' => 'Ambiente actualizado con éxito', 'company' => auth()->user()->company];
     }
+    
 }
