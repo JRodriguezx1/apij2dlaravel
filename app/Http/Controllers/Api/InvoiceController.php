@@ -212,6 +212,7 @@ class InvoiceController extends Controller
         $invoice = $this->createXML(compact('user', 'company', 'customer', 'taxTotals', 'withHoldingTaxTotal', 'resolution', 'paymentForm', 'typeDocument', 'invoiceLines', 'allowanceCharges', 'legalMonetaryTotals', 'date', 'time', 'notes', 'typeoperation', 'orderreference', 'prepaidpayment', 'delivery', 'deliveryparty', 'request', 'idcurrency', 'calculationrate', 'calculationratedate', 'healthfields'));
         //echo htmlentities($invoice->saveXML());
         //json_encode($invoice);
+        
         return [
                 'success' => true,
                 'message' => 'Invoice ok',
