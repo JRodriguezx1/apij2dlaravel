@@ -27,6 +27,8 @@ use App\Traits\DocumentTrait;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use ubl21dian\XAdES\SignInvoice;
+use ubl21dian\Templates\SOAP\SendTestSetAsync;
 
 
 class InvoiceController extends Controller
@@ -212,11 +214,46 @@ class InvoiceController extends Controller
         $invoice = $this->createXML(compact('user', 'company', 'customer', 'taxTotals', 'withHoldingTaxTotal', 'resolution', 'paymentForm', 'typeDocument', 'invoiceLines', 'allowanceCharges', 'legalMonetaryTotals', 'date', 'time', 'notes', 'typeoperation', 'orderreference', 'prepaidpayment', 'delivery', 'deliveryparty', 'request', 'idcurrency', 'calculationrate', 'calculationratedate', 'healthfields'));
         //echo htmlentities($invoice->saveXML());
         //json_encode($invoice);
-        
+
+
+        // Signature XML
+        $signInvoice = new SignInvoice($company->certificate->path, $company->certificate->password);
+        $signInvoice->softwareID = $company->software->identifier;
+        $signInvoice->pin = $company->software->pin;
+        $signInvoice->technicalKey = $resolution->technical_key;
+
+        //Crear direccion para guardar el archivo xml
+        if ($request->GuardarEn){
+            if (!is_dir($request->GuardarEn)) {
+                mkdir($request->GuardarEn);
+            }
+            $signInvoice->GuardarEn = $request->GuardarEn."\\FE-{$resolution->next_consecutive}.xml";
+        }
+        else{
+            if (!is_dir(storage_path("app/public/{$company->identification_number}"))) {
+                mkdir(storage_path("app/public/{$company->identification_number}"));
+            }
+            $signInvoice->GuardarEn = storage_path("app/public/{$company->identification_number}/FE-{$resolution->next_consecutive}.xml");  //direccion local para guardar el archivo xml
+        }
+
+        // enviar documento
+        $sendTestSetAsync = new SendTestSetAsync($company->certificate->path, $company->certificate->password);
+        $sendTestSetAsync->To = $company->software->url;
+        $sendTestSetAsync->fileName = "{$resolution->next_consecutive}.xml";
+
+        if ($request->GuardarEn)
+          $sendTestSetAsync->contentFile = $this->zipBase64($company, $resolution, $signInvoice->sign($invoice), $request->GuardarEn."\\FES-{$resolution->next_consecutive}");
+        else
+          $sendTestSetAsync->contentFile = $this->zipBase64($company, $resolution, $signInvoice->sign($invoice), storage_path("app/public/{$company->identification_number}/FES-{$resolution->next_consecutive}"));
+
+        $sendTestSetAsync->testSetId = $testSetId;
+
+
         return [
                 'success' => true,
                 'message' => 'Invoice ok',
-                'content' => htmlentities($invoice->saveXML())
+                'content' => htmlentities($invoice->saveXML()),
+                'dir' => $signInvoice->GuardarEn
             ];
         
     }

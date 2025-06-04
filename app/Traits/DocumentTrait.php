@@ -3,11 +3,18 @@
 namespace App\Traits;
 
 use App\Http\Controllers\Api\ConfigurationController;
+use App\Models\Company;
+use App\Models\Resolution;
 use Exception;
 use DOMDocument;
 use InvalidArgumentException;
 use Carbon\Carbon;
 use DateTime;
+use Illuminate\Support\Facades\Storage;
+use ubl21dian\Sign;
+use ZipArchive;
+use App\Custom\zipfileDIAN;
+use App\Models\TypeDocument;
 
 trait DocumentTrait
 {
@@ -183,5 +190,64 @@ trait DocumentTrait
         } catch (Exception $e) {
             throw new Exception("Error: {$e->getMessage()}");
         }
+    }
+
+    protected function zipBase64(Company $company, Resolution $resolution, Sign $sign, $GuardarEn = false, $batch = false){
+        $dir = preg_replace("/[\r\n|\n|\r]+/", "", "zip/{$resolution->company_id}");
+        $nameXML = preg_replace("/[\r\n|\n|\r]+/", "", $this->getFileName($company, $resolution));
+        if ($batch)
+          $nameZip = $batch.".zip";
+        else
+          $nameZip = preg_replace("/[\r\n|\n|\r]+/", "", $this->getFileName($company, $resolution, 6, '.zip'));
+
+        $this->pathZIP = preg_replace("/[\r\n|\n|\r]+/", "", "app/zip/{$resolution->company_id}/{$nameZip}");
+
+        Storage::put(preg_replace("/[\r\n|\n|\r]+/", "", "xml/{$resolution->company_id}/{$nameXML}"), $sign->xml);
+
+        if (!Storage::has($dir)) {
+            Storage::makeDirectory($dir);
+        }
+
+        $zip = new ZipArchive();
+
+        $result_code = $zip->open(storage_path($this->pathZIP), ZipArchive::CREATE);
+        if($result_code !== true){
+            $zip = new zipfileDIAN();
+            $zip->add_file(implode("", file(preg_replace("/[\r\n|\n|\r]+/", "", storage_path("app/xml/{$resolution->company_id}/{$nameXML}")))), preg_replace("/[\r\n|\n|\r]+/", "", $nameXML));
+			Storage::put(preg_replace("/[\r\n|\n|\r]+/", "", "zip/{$resolution->company_id}/{$nameZip}"), $zip->file());
+        }
+        else{
+            $zip->addFile(preg_replace("/[\r\n|\n|\r]+/", "", storage_path("app/xml/{$resolution->company_id}/{$nameXML}")), preg_replace("/[\r\n|\n|\r]+/", "", $nameXML));
+            $zip->close();
+        }
+
+        if ($GuardarEn){
+            copy(preg_replace("/[\r\n|\n|\r]+/", "", storage_path("app/xml/{$resolution->company_id}/{$nameXML}")), $GuardarEn.".xml");
+            copy(preg_replace("/[\r\n|\n|\r]+/", "", storage_path($this->pathZIP)), $GuardarEn.".zip");
+        }
+
+        return $this->ZipBase64Bytes = base64_encode(file_get_contents(preg_replace("/[\r\n|\n|\r]+/", "", storage_path($this->pathZIP))));
+    }
+
+
+     protected function getFileName(Company $company, Resolution $resolution, $typeDocumentID = null, $extension = '.xml')
+    {
+        $date = now();
+        $prefix = (is_null($typeDocumentID)) ? $resolution->type_document->prefix : TypeDocument::findOrFail($typeDocumentID)->prefix;
+
+        $send = $company->send()->firstOrCreate([
+            'year' => $date->format('Y'),
+            'type_document_id' => $typeDocumentID ?? $resolution->type_document_id,
+        ]);
+
+        $name = "{$prefix}{$this->stuffedString($company->identification_number)}{$this->ppp}{$date->format('y')}{$this->stuffedString($send->next_consecutive ?? 1, 8)}{$extension}";
+
+        $send->increment('next_consecutive');
+        return $name;
+    }
+
+    protected function stuffedString($string, $length = 10, $padString = 0, $padType = STR_PAD_LEFT)
+    {
+        return str_pad($string, $length, $padString, $padType);
     }
 }

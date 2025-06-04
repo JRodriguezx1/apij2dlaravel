@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "6b96ab76958bd48f71fe14b428c7fea7",
+    "content-hash": "7d77b299c38a26cfb8c5101831130d80",
     "packages": [
         {
             "name": "brick/math",
@@ -5774,6 +5774,67 @@
             "time": "2024-12-21T16:25:41+00:00"
         },
         {
+            "name": "ubl21dian/torresoftware",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://gitlab.com/torresoftware/ubl21dian.git",
+                "reference": "1cec884f35431d677d30613f408f404b8bdda198"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://gitlab.com/api/v4/projects/torresoftware%2Fubl21dian/repository/archive.zip?sha=1cec884f35431d677d30613f408f404b8bdda198",
+                "reference": "1cec884f35431d677d30613f408f404b8bdda198",
+                "shasum": ""
+            },
+            "require": {
+                "ext-curl": "*",
+                "ext-dom": "*",
+                "ext-libxml": "*",
+                "ext-openssl": "*",
+                "ext-xml": "*",
+                "ext-xmlwriter": "*",
+                "nesbot/carbon": "^2.19",
+                "php": ">= 5.4"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^7.0"
+            },
+            "default-branch": true,
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "ubl21dian\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "LGPL-3.0"
+            ],
+            "authors": [
+                {
+                    "name": "facturalatam",
+                    "email": "soporte@facturalatam.com",
+                    "homepage": "https://facturalatam.com"
+                }
+            ],
+            "description": "Core for electronic invoicing pre-validation - DIAN UBL 2.1",
+            "homepage": "http://facturalatam.com",
+            "keywords": [
+                "core",
+                "dian",
+                "soap dian",
+                "ubl",
+                "web service",
+                "xml"
+            ],
+            "support": {
+                "issues": "https://github.com/torresoftware/ubl21dian/issues",
+                "source": "https://github.com/torresoftware/ubl21dian"
+            },
+            "time": "2025-04-09T16:40:59+00:00"
+        },
+        {
             "name": "vlucas/phpdotenv",
             "version": "v5.6.1",
             "source": {
@@ -8505,7 +8566,9 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {},
+    "stability-flags": {
+        "ubl21dian/torresoftware": 20
+    },
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
