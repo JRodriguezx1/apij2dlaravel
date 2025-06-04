@@ -94,6 +94,7 @@ trait DocumentTrait
             ];
     }
     
+    
     protected function createXML(array $data)
     {
         if($data['typeDocument']['code'] === '01' or $data['typeDocument']['code'] === '02' or $data['typeDocument']['code'] === '03' or $data['typeDocument']['code'] === '05' or $data['typeDocument']['code'] === '95' or $data['typeDocument']['code'] === '91' or $data['typeDocument']['code'] === '92' or $data['typeDocument']['code'] === '20' or $data['typeDocument']['code'] === '93' or $data['typeDocument']['code'] === '94'){
@@ -148,6 +149,7 @@ trait DocumentTrait
             $DOMDocumentXML = new DOMDocument();
             $DOMDocumentXML->preserveWhiteSpace = false;
             $DOMDocumentXML->formatOutput = true;
+
             if(isset($data['request']['is_eqdoc']) && ($data['request']['is_eqdoc'] == true)){
                 if($data['request']['is_eqdoc'] == true && $data['typeDocument']['code'] == 94)
                     $DOMDocumentXML->loadXML(view("xml.91", $data)->render());
@@ -155,7 +157,7 @@ trait DocumentTrait
                     $DOMDocumentXML->loadXML(view("xml.92", $data)->render());
             }
             else{
-                $DOMDocumentXML->loadXML(view("xml.{$data['typeDocument']['code']}", $data)->render());
+                $DOMDocumentXML->loadXML(view("xml.{$data['typeDocument']['code']}", $data)->render());  //aqui se busca la plantilla 01.blade para FE
             }
             if(isset($data['signedxml']) and ($data['typeDocument']['code'] === '89')){
                 $rootNode = $DOMDocumentXML->documentElement;

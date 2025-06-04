@@ -45,8 +45,9 @@ Route::middleware('auth.token')->group(function(){
         });
 
         //Invoice
-        Route::prefix('/invoince')->group(function(){
+        Route::prefix('/invoice')->group(function(){
             Route::post('/{testSetId}', [InvoiceController::class, 'testSetStore']);
+            Route::post('/', [InvoiceController::class, 'store']);
         });
     });
 });

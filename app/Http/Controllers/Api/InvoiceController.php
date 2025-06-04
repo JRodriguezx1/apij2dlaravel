@@ -38,6 +38,7 @@ class InvoiceController extends Controller
     public function index()
     {
         //
+        return "hola index";
         
     }
 
@@ -55,6 +56,7 @@ class InvoiceController extends Controller
     public function store(Request $request)
     {
         //
+        return "hola store";
     }
 
     /**
@@ -118,7 +120,7 @@ class InvoiceController extends Controller
             $calculationratedate = $request->calculationratedate;
         }
         else{
-            $idcurrency = TypeCurrency::findOrFail($invoice_doc->currency_id);
+            $idcurrency = TypeCurrency::findOrFail(33/*$invoice_doc->currency_id*/);
             $calculationrate = 1;
             $calculationratedate = Carbon::now()->format('Y-m-d');
         }
@@ -208,7 +210,13 @@ class InvoiceController extends Controller
 
         // Create XML
         $invoice = $this->createXML(compact('user', 'company', 'customer', 'taxTotals', 'withHoldingTaxTotal', 'resolution', 'paymentForm', 'typeDocument', 'invoiceLines', 'allowanceCharges', 'legalMonetaryTotals', 'date', 'time', 'notes', 'typeoperation', 'orderreference', 'prepaidpayment', 'delivery', 'deliveryparty', 'request', 'idcurrency', 'calculationrate', 'calculationratedate', 'healthfields'));
-        
+        //echo htmlentities($invoice->saveXML());
+        //json_encode($invoice);
+        return [
+                'success' => true,
+                'message' => 'Invoice ok',
+                'content' => htmlentities($invoice->saveXML())
+            ];
         
     }
 

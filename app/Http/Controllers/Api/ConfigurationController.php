@@ -200,6 +200,54 @@ class ConfigurationController extends Controller
         
     }
 
+
+    public function CertificateEndDate($user = FALSE){
+        if($user === FALSE)
+            $company = auth()->user()->company;
+        else
+            $company = $user->company;
+        $pfxContent = file_get_contents(storage_path("app/certificates/".$company->certificate->name));
+        try {
+            if (!openssl_pkcs12_read($pfxContent, $x509certdata, $company->certificate->password)) {
+                throw new Exception('The certificate could not be read.');
+            }
+            else{
+                $CertPriv   = array();
+                $CertPriv   = openssl_x509_parse(openssl_x509_read($x509certdata['cert']));
+
+                $PrivateKey = $x509certdata['pkey'];
+
+                $pub_key = openssl_pkey_get_public($x509certdata['cert']);
+                $keyData = openssl_pkey_get_details($pub_key);
+
+                $PublicKey  = $keyData['key'];
+
+                //return $CertPriv['name'];                                     //Nome
+                //return $CertPriv['hash'];                                     //hash
+                //return $CertPriv['subject']['C'];                             //País
+                //return $CertPriv['subject']['ST'];                            //Estado
+                //return $CertPriv['subject']['L'];                             //Município
+                //return $CertPriv['subject']['CN'];                            //Razão Social e CNPJ / CPF
+                return date('d/m/Y', $CertPriv['validTo_time_t'] );             //Validade
+                //return $CertPriv['extensions']['subjectAltName'];             //Emails Cadastrados separado por ,
+                //return $CertPriv['extensions']['authorityKeyIdentifier'];
+                //return $CertPriv['issuer'];                                   //Emissor
+                //return $PublicKey;
+                //return $PrivateKey;
+            }
+        } catch (Exception $e) {
+            if (false == ($error = openssl_error_string())) {
+                return response([
+                    'message' => $e->getMessage(),
+                    'errors' => [
+                        'certificate' => 'The base64 encoding is not valid.',
+                    ],
+                ], 422);
+            }
+            return $pfxContent;
+        }
+    }
+
     /**
      * Show the form for editing the specified resource.
      */
