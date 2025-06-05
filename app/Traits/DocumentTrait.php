@@ -192,7 +192,8 @@ trait DocumentTrait
         }
     }
 
-    protected function zipBase64(Company $company, Resolution $resolution, Sign $sign, $GuardarEn = false, $batch = false){
+    protected function zipBase64(Company $company, Resolution $resolution, Sign $sign, $GuardarEn = false, $batch = false){ //GuardarEn = app/public/1094955142/FES-SETUP994411000
+        
         $dir = preg_replace("/[\r\n|\n|\r]+/", "", "zip/{$resolution->company_id}");
         $nameXML = preg_replace("/[\r\n|\n|\r]+/", "", $this->getFileName($company, $resolution));
         if ($batch)
@@ -202,7 +203,7 @@ trait DocumentTrait
 
         $this->pathZIP = preg_replace("/[\r\n|\n|\r]+/", "", "app/zip/{$resolution->company_id}/{$nameZip}");
 
-        Storage::put(preg_replace("/[\r\n|\n|\r]+/", "", "xml/{$resolution->company_id}/{$nameXML}"), $sign->xml);
+        Storage::put(preg_replace("/[\r\n|\n|\r]+/", "", "xml/{$resolution->company_id}/{$nameXML}"), $sign->xml);  //guardamos el xml firmado en app/xml/17/nombre.xml
 
         if (!Storage::has($dir)) {
             Storage::makeDirectory($dir);
@@ -221,7 +222,7 @@ trait DocumentTrait
             $zip->close();
         }
 
-        if ($GuardarEn){
+        if ($GuardarEn){  //GuardarEn = app/public/1094955142/FEs-SETUP994411000
             copy(preg_replace("/[\r\n|\n|\r]+/", "", storage_path("app/xml/{$resolution->company_id}/{$nameXML}")), $GuardarEn.".xml");
             copy(preg_replace("/[\r\n|\n|\r]+/", "", storage_path($this->pathZIP)), $GuardarEn.".zip");
         }
@@ -246,6 +247,7 @@ trait DocumentTrait
         return $name;
     }
 
+    
     protected function stuffedString($string, $length = 10, $padString = 0, $padType = STR_PAD_LEFT)
     {
         return str_pad($string, $length, $padString, $padType);
