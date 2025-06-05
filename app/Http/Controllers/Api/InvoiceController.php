@@ -249,11 +249,28 @@ class InvoiceController extends Controller
         $sendTestSetAsync->testSetId = $testSetId;
 
 
-        return [
+        /*return [
                 'success' => true,
                 'message' => 'Invoice ok',
                 'content' => htmlentities($invoice->saveXML()),
                 'dir' => $signInvoice->GuardarEn
+            ];*/
+            
+        return [
+                'message' => "{$typeDocument->name} #{$resolution->next_consecutive} generada con éxito",
+                'ResponseDian' => $sendTestSetAsync->signToSend(storage_path("app/public/{$company->identification_number}/ReqFE-{$resolution->next_consecutive}.xml"))->getResponseToObject(storage_path("app/public/{$company->identification_number}/RptaFE-{$resolution->next_consecutive}.xml")),
+                'invoicexml'=>base64_encode(file_get_contents(storage_path("app/public/{$company->identification_number}/FES-{$resolution->next_consecutive}.xml"))),
+                'zipinvoicexml'=>base64_encode(file_get_contents(storage_path("app/public/{$company->identification_number}/FES-{$resolution->next_consecutive}.zip"))),
+                'unsignedinvoicexml'=>base64_encode(file_get_contents(storage_path("app/public/{$company->identification_number}/FE-{$resolution->next_consecutive}.xml"))),
+                'reqfe'=>base64_encode(file_get_contents(storage_path("app/public/{$company->identification_number}/ReqFE-{$resolution->next_consecutive}.xml"))),
+                'rptafe'=>base64_encode(file_get_contents(storage_path("app/public/{$company->identification_number}/RptaFE-{$resolution->next_consecutive}.xml"))),
+                'urlinvoicexml'=>"FES-{$resolution->next_consecutive}.xml",
+                'urlinvoicepdf'=>"FES-{$resolution->next_consecutive}.pdf",
+                'urlinvoiceattached'=>"Attachment-{$resolution->next_consecutive}.xml",
+                'cufe' => $signInvoice->ConsultarCUFE(),
+                //'QRStr' => $QRStr,
+                'certificate_days_left' => $certificate_days_left,
+                'resolution_days_left' => $this->days_between_dates(Carbon::now()->format('Y-m-d'), $resolution->date_to),
             ];
         
     }

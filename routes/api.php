@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\ConfigurationController;
 use App\Http\Controllers\Api\InvoiceController;
+use App\Http\Controllers\Api\StateController;
 
 /*
 |--------------------------------------------------------------------------
@@ -48,6 +49,12 @@ Route::middleware('auth.token')->group(function(){
         Route::prefix('/invoice')->group(function(){
             Route::post('/{testSetId}', [InvoiceController::class, 'testSetStore']);
             Route::post('/', [InvoiceController::class, 'store']);
+        });
+
+        //Status
+        Route::prefix('/status')->group(function(){
+            Route::post('/zip/{trackId}/{GuardarEn?}', [StateController::class, 'zip']);
+            Route::post('/document/{trackId}/{GuardarEn?}', [StateController::class, 'document']);
         });
     });
 });

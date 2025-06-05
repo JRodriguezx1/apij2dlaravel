@@ -250,4 +250,15 @@ trait DocumentTrait
     {
         return str_pad($string, $length, $padString, $padType);
     }
+
+
+    function days_between_dates($date_from, $date_to){
+        $date_initial = new DateTime(Carbon::parse($date_from)->format('Y-m-d'));
+        $date_final = new DateTime(Carbon::parse($date_to)->format('Y-m-d'));
+        $interval = $date_initial->diff($date_final);
+        if($interval->invert)
+            return $interval->days * (-1);
+        else
+            return $interval->days;
+    }
 }
