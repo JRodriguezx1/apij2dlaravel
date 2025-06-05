@@ -233,7 +233,7 @@ class InvoiceController extends Controller
             if (!is_dir(storage_path("app/public/{$company->identification_number}"))) {
                 mkdir(storage_path("app/public/{$company->identification_number}"));
             }
-            $signInvoice->GuardarEn = storage_path("app/public/{$company->identification_number}/FE-{$resolution->next_consecutive}.xml");  //direccion local para guardar el archivo xml
+            $signInvoice->GuardarEn = storage_path("app/public/{$company->identification_number}/FE-{$resolution->next_consecutive}.xml");  //direccion local para guardar el archivo xml signInvoice->GuardarEn = app/public/1094955142/FE-SETUP994411000.xml
         }
 
         // enviar documento
@@ -241,11 +241,13 @@ class InvoiceController extends Controller
         $sendTestSetAsync->To = $company->software->url;
         $sendTestSetAsync->fileName = "{$resolution->next_consecutive}.xml";
 
-        if ($request->GuardarEn)
+        $x = 0;
+        if ($request->GuardarEn){  
           $sendTestSetAsync->contentFile = $this->zipBase64($company, $resolution, $signInvoice->sign($invoice), $request->GuardarEn."\\FES-{$resolution->next_consecutive}");
-        else
+        }else{
+            $x = 1;
           $sendTestSetAsync->contentFile = $this->zipBase64($company, $resolution, $signInvoice->sign($invoice), storage_path("app/public/{$company->identification_number}/FES-{$resolution->next_consecutive}"));
-
+        }
         $sendTestSetAsync->testSetId = $testSetId;
 
 
