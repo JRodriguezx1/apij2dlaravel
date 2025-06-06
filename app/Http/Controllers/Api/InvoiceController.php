@@ -122,7 +122,7 @@ class InvoiceController extends Controller
             $calculationratedate = $request->calculationratedate;
         }
         else{
-            $idcurrency = TypeCurrency::findOrFail(33/*$invoice_doc->currency_id*/);
+            $idcurrency = TypeCurrency::findOrFail(35/*$invoice_doc->currency_id*/);
             $calculationrate = 1;
             $calculationratedate = Carbon::now()->format('Y-m-d');
         }
