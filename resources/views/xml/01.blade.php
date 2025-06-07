@@ -66,7 +66,6 @@
     {{-- AllowanceCharges --}}
     @include('xml._allowance_charges')
     {{-- PaymentExchangeRate --}}
-    @include('xml._payment_exchange_rate')
     {{-- TaxTotals --}}
     @include('xml._tax_totals', ['generalView' => true])
     {{-- HoldingTaxTotals --}}
