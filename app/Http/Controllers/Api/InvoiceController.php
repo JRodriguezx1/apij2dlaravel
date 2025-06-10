@@ -58,7 +58,10 @@ class InvoiceController extends Controller
     public function store(Request $request)
     {
         //
-        return "hola store";
+        //obtener usuario
+        $user = auth()->user();
+        //obtener compañia
+        $company = $user->company;
     }
 
     /**
@@ -241,22 +244,13 @@ class InvoiceController extends Controller
         $sendTestSetAsync->To = $company->software->url;
         $sendTestSetAsync->fileName = "{$resolution->next_consecutive}.xml";
 
-        $x = 0;
         if ($request->GuardarEn){  
           $sendTestSetAsync->contentFile = $this->zipBase64($company, $resolution, $signInvoice->sign($invoice), $request->GuardarEn."\\FES-{$resolution->next_consecutive}");
         }else{
-            $x = 1;
           $sendTestSetAsync->contentFile = $this->zipBase64($company, $resolution, $signInvoice->sign($invoice), storage_path("app/public/{$company->identification_number}/FES-{$resolution->next_consecutive}"));
         }
         $sendTestSetAsync->testSetId = $testSetId;
 
-
-        /*return [
-                'success' => true,
-                'message' => 'Invoice ok',
-                'content' => htmlentities($invoice->saveXML()),
-                'dir' => $signInvoice->GuardarEn
-            ];*/
             
         return [
                 'message' => "{$typeDocument->name} #{$resolution->next_consecutive} generada con éxito",

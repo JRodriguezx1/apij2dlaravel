@@ -18,7 +18,7 @@ class ConfigurationRequest extends FormRequest
 
     public function validationData()
     {
-        if (method_exists($this->route(), 'parameters')) {
+        if (method_exists($this->route(), 'parameters')) { //valida que el metodo parameters eixta en la instancia route()
             $this->request->add($this->route()->parameters());
             $this->query->add($this->route()->parameters());
             return array_merge($this->route()->parameters(), $this->all());
