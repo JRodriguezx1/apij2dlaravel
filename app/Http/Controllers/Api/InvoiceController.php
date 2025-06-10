@@ -62,18 +62,8 @@ class InvoiceController extends Controller
         $user = auth()->user();
         //obtener compañia
         $company = $user->company;
-    }
 
-    /**
-     * Display the specified resource.
-     */
-    public function testSetStore(InvoiceRequest $request, $testSetId)
-    {
-        //obtener usuario
-        $user = auth()->user();
-        //obtener compañia
-        $company = $user->company;
-        //Verifica certificado
+         //Verifica certificado
         $certificate_days_left = 0;
         $c = $this->verify_certificate();
         if(!$c['success']){
@@ -85,6 +75,7 @@ class InvoiceController extends Controller
         // Type document
         $typeDocument = TypeDocument::findOrFail($request->type_document_id); //si es factura electronica de venta, si es factura de exportacion, si es factura de contigencia, nota credito etc.
 
+        //Customer
         $customerAll = collect($request->customer);
         if(isset($customerAll['municipality_id_fact']))
             $customerAll['municipality_id'] = Municipality::where('codefacturador', $customerAll['municipality_id_fact'])->first();
@@ -107,8 +98,103 @@ class InvoiceController extends Controller
 
             // Delivery party company
             $deliveryparty->company = new Company($deliverypartyAll->toArray());
+        }else{
+            $delivery = NULL;
+            $deliveryparty = NULL;
+        }
+
+        // Type operation id
+        if(!$request->type_operation_id)
+          $request->type_operation_id = 10;
+        $typeoperation = TypeOperation::findOrFail($request->type_operation_id);
+
+        // Currency id
+        if(isset($request->idcurrency) and (!is_null($request->idcurrency))){
+            $idcurrency = TypeCurrency::findOrFail($request->idcurrency);
+            $calculationrate = $request->calculationrate;
+            $calculationratedate = $request->calculationratedate;
         }
         else{
+            $idcurrency = TypeCurrency::findOrFail($invoice_doc->currency_id);
+            $calculationrate = 1;
+            $calculationratedate = Carbon::now()->format('Y-m-d');
+        }
+
+        // Resolution
+        $request->resolution->number = $request->number;
+        $resolution = $request->resolution;
+
+        //validar documento antes de enviar
+        /*
+        if(env('VALIDATE_BEFORE_SENDING', false)){
+            $doc = Document::where('type_document_id', $request->type_document_id)->where('identification_number', $company->identification_number)->where('prefix', $resolution->prefix)->where('number', $request->number)->where('state_document_id', 1)->get();
+            if(count($doc) > 0)
+                return [
+                    'success' => false,
+                    'message' => 'Este documento ya fue enviado anteriormente, se registra en la base de datos.',
+                    'customer' => $doc[0]->customer,
+                    'cufe' => $doc[0]->cufe,
+                    'sale' => $doc[0]->total,
+                ];
+        }*/
+
+        // Date time
+        $date = $request->date;
+        $time = $request->time;
+
+        // Notes
+        $notes = $request->notes;
+        
+
+    }
+
+
+
+    /**
+     * Display the specified resource.
+     */
+    public function testSetStore(InvoiceRequest $request, $testSetId)
+    {
+        //obtener usuario
+        $user = auth()->user();
+        //obtener compañia
+        $company = $user->company;
+        //Verifica certificado
+        $certificate_days_left = 0;
+        $c = $this->verify_certificate();
+        if(!$c['success']){
+            return $c;
+        }else{
+            $certificate_days_left = $c['certificate_days_left'];
+        }
+
+        // Type document
+        $typeDocument = TypeDocument::findOrFail($request->type_document_id); //si es factura electronica de venta, si es factura de exportacion, si es factura de contigencia, nota credito etc.
+
+        //Customer
+        $customerAll = collect($request->customer);
+        if(isset($customerAll['municipality_id_fact']))
+            $customerAll['municipality_id'] = Municipality::where('codefacturador', $customerAll['municipality_id_fact'])->first();
+        $customer = new User($customerAll->toArray());
+        
+        // Customer company
+        $customer->company = new Company($customerAll->toArray());
+
+        // Delivery
+        if($request->delivery){
+            $deliveryAll = collect($request->delivery);
+            $delivery = new User($deliveryAll->toArray());
+
+            // Delivery company
+            $delivery->company = new Company($deliveryAll->toArray());
+
+            // Delivery party
+            $deliverypartyAll = collect($request->deliveryparty);
+            $deliveryparty = new User($deliverypartyAll->toArray());
+
+            // Delivery party company
+            $deliveryparty->company = new Company($deliverypartyAll->toArray());
+        }else{
             $delivery = NULL;
             $deliveryparty = NULL;
         }
@@ -254,12 +340,12 @@ class InvoiceController extends Controller
             
         return [
                 'message' => "{$typeDocument->name} #{$resolution->next_consecutive} generada con éxito",
-                'ResponseDian' => $sendTestSetAsync->signToSend(storage_path("app/public/{$company->identification_number}/ReqFE-{$resolution->next_consecutive}.xml"))->getResponseToObject(storage_path("app/public/{$company->identification_number}/RptaFE-{$resolution->next_consecutive}.xml")),
-                'invoicexml'=>base64_encode(file_get_contents(storage_path("app/public/{$company->identification_number}/FES-{$resolution->next_consecutive}.xml"))),
-                'zipinvoicexml'=>base64_encode(file_get_contents(storage_path("app/public/{$company->identification_number}/FES-{$resolution->next_consecutive}.zip"))),
-                'unsignedinvoicexml'=>base64_encode(file_get_contents(storage_path("app/public/{$company->identification_number}/FE-{$resolution->next_consecutive}.xml"))),
+                'ResponseDian' => $sendTestSetAsync->signToSend(storage_path("app/public/{$company->identification_number}/ReqFE-{$resolution->next_consecutive}.xml"))->getResponseToObject(storage_path("app/public/{$company->identification_number}/RptaFE-{$resolution->next_consecutive}.xml")), //enviar documento firmado y obtener su respuesta.
+                'invoicexml'=>base64_encode(file_get_contents(storage_path("app/public/{$company->identification_number}/FES-{$resolution->next_consecutive}.xml"))), //obtener en memoria el documento firmado digitalmente .xml
+                'zipinvoicexml'=>base64_encode(file_get_contents(storage_path("app/public/{$company->identification_number}/FES-{$resolution->next_consecutive}.zip"))), //obtener en memoria el ZIP del documento firmado digitalmente
+                'unsignedinvoicexml'=>base64_encode(file_get_contents(storage_path("app/public/{$company->identification_number}/FE-{$resolution->next_consecutive}.xml"))), //obtener en memoria el documento sin firmar .xml
                 'reqfe'=>base64_encode(file_get_contents(storage_path("app/public/{$company->identification_number}/ReqFE-{$resolution->next_consecutive}.xml"))),
-                'rptafe'=>base64_encode(file_get_contents(storage_path("app/public/{$company->identification_number}/RptaFE-{$resolution->next_consecutive}.xml"))),
+                'rptafe'=>base64_encode(file_get_contents(storage_path("app/public/{$company->identification_number}/RptaFE-{$resolution->next_consecutive}.xml"))),  //respuesta .xml del numero del zip
                 'urlinvoicexml'=>"FES-{$resolution->next_consecutive}.xml",
                 'urlinvoicepdf'=>"FES-{$resolution->next_consecutive}.pdf",
                 'urlinvoiceattached'=>"Attachment-{$resolution->next_consecutive}.xml",
