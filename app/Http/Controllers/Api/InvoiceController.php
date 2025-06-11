@@ -27,6 +27,7 @@ use App\Traits\DocumentTrait;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use ubl21dian\Templates\SOAP\SendBillSync;
 use ubl21dian\XAdES\SignInvoice;
 use ubl21dian\Templates\SOAP\SendTestSetAsync;
 
@@ -145,6 +146,94 @@ class InvoiceController extends Controller
         // Notes
         $notes = $request->notes;
         
+        // Order Reference
+        if($request->order_reference)
+            $orderreference = new OrderReference($request->order_reference);
+        else
+            $orderreference = NULL;
+
+       // Health Fields
+        if($request->health_fields)
+            $healthfields = new HealthField($request->health_fields);
+        else
+            $healthfields = NULL;
+
+        // Payment form default
+        $paymentFormAll = (object) array_merge($this->paymentFormDefault, $request->payment_form ?? []);
+        $paymentForm = PaymentForm::findOrFail($paymentFormAll->payment_form_id);
+        $paymentForm->payment_method_code = PaymentMethod::findOrFail($paymentFormAll->payment_method_id)->code;
+        $paymentForm->nameMethod = PaymentMethod::findOrFail($paymentFormAll->payment_method_id)->name;
+        $paymentForm->payment_due_date = $paymentFormAll->payment_due_date ?? null;
+        $paymentForm->duration_measure = $paymentFormAll->duration_measure ?? null;
+
+        // Allowance charges
+        $allowanceCharges = collect();
+        foreach ($request->allowance_charges ?? [] as $allowanceCharge) {
+            $allowanceCharges->push(new AllowanceCharge($allowanceCharge));
+        }
+
+        // Tax totals
+        $taxTotals = collect();
+        foreach ($request->tax_totals ?? [] as $taxTotal) {
+            $taxTotals->push(new TaxTotal($taxTotal));
+        }
+
+        // Retenciones globales
+        $withHoldingTaxTotal = collect();
+        //$withHoldingTaxTotalCount = 0;
+        //$holdingTaxTotal = $request->holding_tax_total;
+        foreach($request->with_holding_tax_total ?? [] as $item) {
+        //$withHoldingTaxTotalCount++;
+        //$holdingTaxTotal = $request->holding_tax_total;
+            $withHoldingTaxTotal->push(new TaxTotal($item));
+        }
+
+        // Prepaid Payment
+        if($request->prepaid_payment)
+            $prepaidpayment = new PrepaidPayment($request->prepaid_payment);
+        else
+            $prepaidpayment = NULL;
+
+        // Legal monetary totals
+        $legalMonetaryTotals = new LegalMonetaryTotal($request->legal_monetary_totals);
+
+        // Invoice lines
+
+        $invoiceLines = collect();
+        foreach ($request->invoice_lines as $invoiceLine) {
+            $invoiceLines->push(new InvoiceLine($invoiceLine));
+        }
+
+        // Create XML
+        $invoice = $this->createXML(compact('user', 'company', 'customer', 'taxTotals', 'withHoldingTaxTotal', 'resolution', 'paymentForm', 'typeDocument', 'invoiceLines', 'allowanceCharges', 'legalMonetaryTotals', 'date', 'time', 'notes', 'typeoperation', 'orderreference', 'prepaidpayment', 'delivery', 'deliveryparty', 'request', 'idcurrency', 'calculationrate', 'calculationratedate', 'healthfields'));
+
+        // Signature XML
+        $signInvoice = new SignInvoice($company->certificate->path, $company->certificate->password);
+        $signInvoice->softwareID = $company->software->identifier;
+        $signInvoice->pin = $company->software->pin;
+        $signInvoice->technicalKey = $resolution->technical_key;
+
+        //Crear direccion para guardar el archivo xml
+        if ($request->GuardarEn){
+            if (!is_dir($request->GuardarEn)) {
+                mkdir($request->GuardarEn);
+            }
+            $signInvoice->GuardarEn = $request->GuardarEn."\\FE-{$resolution->next_consecutive}.xml";
+        }
+        else{
+            if (!is_dir(storage_path("app/public/{$company->identification_number}"))) {
+                mkdir(storage_path("app/public/{$company->identification_number}"));
+            }
+            $signInvoice->GuardarEn = storage_path("app/public/{$company->identification_number}/FE-{$resolution->next_consecutive}.xml");  //direccion local para guardar el archivo xml signInvoice->GuardarEn = app/public/1094955142/FE-SETUP994411000.xml
+        }
+
+        $sendBillSync = new SendBillSync($company->certificate->path, $company->certificate->password);
+        $sendBillSync->To = $company->software->url;
+        $sendBillSync->fileName = "{$resolution->next_consecutive}.xml";
+        if ($request->GuardarEn)
+            $sendBillSync->contentFile = $this->zipBase64($company, $resolution, $signInvoice->sign($invoice), $request->GuardarEn."\\FES-{$resolution->next_consecutive}");
+        else
+            $sendBillSync->contentFile = $this->zipBase64($company, $resolution, $signInvoice->sign($invoice), storage_path("app/public/{$company->identification_number}/FES-{$resolution->next_consecutive}"));
 
     }
 

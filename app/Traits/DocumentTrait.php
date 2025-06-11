@@ -263,4 +263,10 @@ trait DocumentTrait
         else
             return $interval->days;
     }
+
+
+    protected function createPDF($user, $company, $customer, $typeDocument, $resolution, $date, $time, $paymentForm, $request, $cufecude, $tipodoc = "INVOICE", $withHoldingTaxTotal = NULL, $notes = NULL, $healthfields)
+    {
+        
+    }
 }
