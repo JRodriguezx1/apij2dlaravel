@@ -235,6 +235,8 @@ class InvoiceController extends Controller
         else
             $sendBillSync->contentFile = $this->zipBase64($company, $resolution, $signInvoice->sign($invoice), storage_path("app/public/{$company->identification_number}/FES-{$resolution->next_consecutive}"));
 
+        
+
     }
 
 
