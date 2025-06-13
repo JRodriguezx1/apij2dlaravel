@@ -375,16 +375,18 @@ trait DocumentTrait
                 if($tipodoc == 'POS')
                     $pdf = $this->initMPdf('pos', $template_pdf);
                 else
-                    $pdf = $this->initMPdf();
+                    $pdf = $this->initMPdf(); //inicializar mpdf para facturas
                     $pdf->SetHTMLHeader(View::make("pdfs.".strtolower($tipodoc).".header", compact("user", "company", "customer", "resolution", "date", "time", "paymentForm", "request", "cufecude", "imageQr", "imgLogo", "withHoldingTaxTotal", "notes", "healthfields", "firma_facturacion")));
                     $pdf->SetHTMLFooter(View::make("pdfs.".strtolower($tipodoc).".footer", compact("user", "company", "customer", "resolution", "date", "time", "paymentForm", "request", "cufecude", "imageQr", "imgLogo", "withHoldingTaxTotal", "notes", "healthfields", "firma_facturacion")));
                     $pdf->WriteHTML(View::make("pdfs.".strtolower($tipodoc).".template".$template_pdf, compact("user", "company", "customer", "resolution", "date", "time", "paymentForm", "request", "cufecude", "imageQr", "imgLogo", "withHoldingTaxTotal", "notes", "healthfields", "firma_facturacion")), HTMLParserMode::HTML_BODY);
             }
 
-                $filename = storage_path("app/public/{$company->identification_number}/FES-{$resolution->next_consecutive}.pdf");
+            $filename = storage_path("app/public/{$company->identification_number}/FES-{$resolution->next_consecutive}.pdf");  //ubicacion en donde se guardara el PDF.
              
         }//fin tipo de documentos INVOICE o POS
 
+        $pdf->Output($filename);
+        return $QRStr;
 
     }
 
@@ -418,7 +420,7 @@ trait DocumentTrait
         $filename = base_path('resources/views/pdfs/' . $type . '/config'.$template.'.json');
         if (file_exists($filename)) {
             $jsonD =  file_get_contents('config'.$template.'.json');
-            $margin = json_decode($jsonD,true);
+            $margin = json_decode($jsonD, true);
             if(isset($margin)){
                 $margin_top = $margin['top'];
                 $margin_right = $margin['right'];
@@ -428,9 +430,7 @@ trait DocumentTrait
         }
         if($template){
             $pdf = new Mpdf([
-                'fontDir' => array_merge($fontDirs, [
-                    base_path('public/fonts/roboto/'),
-                ]),
+                'fontDir' => array_merge($fontDirs, [base_path('public/fonts/roboto/')]),
                 'fontdata' => $fontData + [
                     'Roboto' => [
                         'R' => 'Roboto-Regular.ttf',
@@ -447,12 +447,9 @@ trait DocumentTrait
                 'margin_footer' => 2,
                 'format' => [$pageWidth, $pageHeight], // Establece el tamaño de la página
             ]);
-        }
-        else{
+        }else{  //si no plantilla enviada
             $pdf = new Mpdf([
-                'fontDir' => array_merge($fontDirs, [
-                    base_path('public/fonts/roboto/'),
-                ]),
+                'fontDir' => array_merge($fontDirs, [base_path('public/fonts/roboto/'),]),
                 'fontdata' => $fontData + [
                     'Roboto' => [
                         'R' => 'Roboto-Regular.ttf',

@@ -428,10 +428,11 @@ class InvoiceController extends Controller
         }
         $sendTestSetAsync->testSetId = $testSetId;
 
+        $QRStr = $this->createPDF($user, $company, $customer, $typeDocument, $resolution, $date, $time, $paymentForm, $request, $signInvoice->ConsultarCUFE(), "INVOICE", $withHoldingTaxTotal, $notes, $healthfields);
             
         return [
                 'message' => "{$typeDocument->name} #{$resolution->next_consecutive} generada con éxito",
-                'ResponseDian' => $sendTestSetAsync->signToSend(storage_path("app/public/{$company->identification_number}/ReqFE-{$resolution->next_consecutive}.xml"))->getResponseToObject(storage_path("app/public/{$company->identification_number}/RptaFE-{$resolution->next_consecutive}.xml")), //enviar documento firmado y obtener su respuesta.
+                /*'ResponseDian' => $sendTestSetAsync->signToSend(storage_path("app/public/{$company->identification_number}/ReqFE-{$resolution->next_consecutive}.xml"))->getResponseToObject(storage_path("app/public/{$company->identification_number}/RptaFE-{$resolution->next_consecutive}.xml")), //enviar documento firmado y obtener su respuesta.
                 'invoicexml'=>base64_encode(file_get_contents(storage_path("app/public/{$company->identification_number}/FES-{$resolution->next_consecutive}.xml"))), //obtener en memoria el documento firmado digitalmente .xml
                 'zipinvoicexml'=>base64_encode(file_get_contents(storage_path("app/public/{$company->identification_number}/FES-{$resolution->next_consecutive}.zip"))), //obtener en memoria el ZIP del documento firmado digitalmente
                 'unsignedinvoicexml'=>base64_encode(file_get_contents(storage_path("app/public/{$company->identification_number}/FE-{$resolution->next_consecutive}.xml"))), //obtener en memoria el documento sin firmar .xml
@@ -443,7 +444,7 @@ class InvoiceController extends Controller
                 'cufe' => $signInvoice->ConsultarCUFE(),
                 //'QRStr' => $QRStr,
                 'certificate_days_left' => $certificate_days_left,
-                'resolution_days_left' => $this->days_between_dates(Carbon::now()->format('Y-m-d'), $resolution->date_to),
+                'resolution_days_left' => $this->days_between_dates(Carbon::now()->format('Y-m-d'), $resolution->date_to),*/
             ];
         
     }
