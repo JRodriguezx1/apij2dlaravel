@@ -11,6 +11,8 @@
         "laravel/framework": "^10.10",
         "laravel/sanctum": "^3.3",
         "laravel/tinker": "^2.8",
+        "mpdf/mpdf": "^8.2",
+        "simplesoftwareio/simple-qrcode": "^4.2",
         "ubl21dian/torresoftware": "dev-master"
     },
     "require-dev": {
