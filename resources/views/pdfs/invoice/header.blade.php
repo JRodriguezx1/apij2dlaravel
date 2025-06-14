@@ -75,7 +75,7 @@
                 @else
                     {{$company->address}} -
                 @endif
-                @inject('municipality', 'App\Municipality')
+                @inject('municipality', 'App\Models\Municipality')
                 @if(isset($request->establishment_municipality))
                     {{$municipality->findOrFail($request->establishment_municipality)['name']}} - {{$municipality->findOrFail($request->establishment_municipality)['department']['name']}} -
                 @else

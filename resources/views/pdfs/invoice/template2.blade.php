@@ -121,7 +121,7 @@
                         <td>{{$request['calculationratedate']}}</td>
                     </tr>
                     <tr>
-                        @inject('currency', 'App\TypeCurrency')
+                        @inject('currency', 'App\Models\Models\TypeCurrency')
                         <td>Tipo Moneda:</td>
                         <td>{{$currency->findOrFail($request['idcurrency'])['name']}}</td>
                     </tr>
@@ -207,7 +207,7 @@
             @foreach($request['invoice_lines'] as $item)
                 <?php $ItemNro = $ItemNro + 1; ?>
                 <tr>
-                    @inject('um', 'App\UnitMeasure')
+                    @inject('um', 'App\Models\UnitMeasure')
                     @if($item['description'] == 'Administración' or $item['description'] == 'Imprevisto' or $item['description'] == 'Utilidad')
                         <td>{{$ItemNro}}</td>
                         <td class="text-right">
@@ -313,7 +313,7 @@
                                 @foreach($request->tax_totals as $item)
                                     <tr>
                                         <?php $TotalImpuestos = $TotalImpuestos + $item['tax_amount'] ?>
-                                        @inject('tax', 'App\Tax')
+                                        @inject('tax', 'App\Models\Tax')
                                         <td>{{$tax->findOrFail($item['tax_id'])['name']}}</td>
                                         <td class="text-right">{{number_format($item['taxable_amount'], 2)}}</td>
                                         <td class="text-right">{{number_format($item['percent'], 2)}}%</td>
@@ -342,7 +342,7 @@
                                 @foreach($withHoldingTaxTotal as $item)
                                     <tr>
                                         <?php $TotalRetenciones = $TotalRetenciones + $item['tax_amount'] ?>
-                                        @inject('tax', 'App\Tax')
+                                        @inject('tax', 'App\Models\Tax')
                                         <td>{{$tax->findOrFail($item['tax_id'])['name']}}</td>
                                         <td class="text-right">{{number_format($item['taxable_amount'], 2)}}</td>
                                         <td class="text-right">{{number_format($item['percent'], 2)}}%</td>

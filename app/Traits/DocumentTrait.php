@@ -326,7 +326,7 @@ trait DocumentTrait
         if($tipodoc == "INVOICE" || $tipodoc == "POS"){//Si tipo de documento es invoice o POS
             if($company->type_environment_id == 2){ //si es ambiente de pruebas
                 if(isset($request->tax_totals[0]['tax_amount'])){ //si esta definido tax total, se establece el impuesto IVA
-                    $qrBase64 = base64_encode(QrCode::format('png') //me codifica en base 64 el qr del png y establece URL de habilitacion
+                    $qrBase64 = base64_encode(QrCode::format('svg') //me codifica en base 64 el qr del png y establece URL de habilitacion
                                             ->errorCorrection('Q')
                                             ->size(220)
                                             ->margin(0)
@@ -334,7 +334,7 @@ trait DocumentTrait
                     $QRStr = 'NumFac: '.$request->number.PHP_EOL.'FecFac: '.$date.PHP_EOL.'NitFac: '.$company->identification_number.PHP_EOL.'DocAdq: '.$customer->company->identification_number.PHP_EOL.'ValFac: '.$request->legal_monetary_totals['tax_exclusive_amount'].PHP_EOL.'ValIva: '.$request->tax_totals[0]['tax_amount'].PHP_EOL.'ValOtroIm: 0.00'.PHP_EOL.'ValTotal: '.$request->legal_monetary_totals['payable_amount'].PHP_EOL.'CUFE: '.$cufecude.PHP_EOL.'https://catalogo-vpfe-hab.dian.gov.co/document/searchqr?documentkey='.$cufecude;
                 }
                 else{ //No se establece el impuesto IVA y establece URL de habilitacion
-                    $qrBase64 = base64_encode(QrCode::format('png')
+                    $qrBase64 = base64_encode(QrCode::format('svg')
                                             ->errorCorrection('Q')
                                             ->size(220)
                                             ->margin(0)
@@ -344,7 +344,7 @@ trait DocumentTrait
             }
             else{ // si es produccion
                 if(isset($request->tax_totals[0]['tax_amount'])){ //si esta definido tax total
-                    $qrBase64 = base64_encode(QrCode::format('png') //se establece el impuesto IVA y URL de produccion, QR codificado en base 64
+                    $qrBase64 = base64_encode(QrCode::format('svg') //se establece el impuesto IVA y URL de produccion, QR codificado en base 64
                                             ->errorCorrection('Q')
                                             ->size(220)
                                             ->margin(0)
@@ -352,7 +352,7 @@ trait DocumentTrait
                     $QRStr = 'NumFac: '.$request->number.PHP_EOL.'FecFac: '.$date.PHP_EOL.'NitFac: '.$company->identification_number.PHP_EOL.'DocAdq: '.$customer->company->identification_number.PHP_EOL.'ValFac: '.$request->legal_monetary_totals['tax_exclusive_amount'].PHP_EOL.'ValIva: '.$request->tax_totals[0]['tax_amount'].PHP_EOL.'ValOtroIm: 0.00'.PHP_EOL.'ValTotal: '.$request->legal_monetary_totals['payable_amount'].PHP_EOL.'CUFE: '.$cufecude.PHP_EOL.'https://catalogo-vpfe.dian.gov.co/document/searchqr?documentkey='.$cufecude;
                 }
                 else{ //No se establece el impuesto IVA y establece URL de produccion
-                    $qrBase64 = base64_encode(QrCode::format('png')
+                    $qrBase64 = base64_encode(QrCode::format('svg')
                                             ->errorCorrection('Q')
                                             ->size(220)
                                             ->margin(0)
