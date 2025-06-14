@@ -361,7 +361,7 @@ trait DocumentTrait
                 }
             }
 
-             $imageQr    =  "data:image/png;base64, ".$qrBase64;
+             $imageQr    =  "data:image/svg+xml;base64, ".$qrBase64;
 
             if($template_json){
                     if($tipodoc == 'POS')
