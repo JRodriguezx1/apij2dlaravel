@@ -230,12 +230,54 @@ class InvoiceController extends Controller
         $sendBillSync = new SendBillSync($company->certificate->path, $company->certificate->password);
         $sendBillSync->To = $company->software->url;
         $sendBillSync->fileName = "{$resolution->next_consecutive}.xml";
-        if ($request->GuardarEn)
+        if ($request->GuardarEn){
             $sendBillSync->contentFile = $this->zipBase64($company, $resolution, $signInvoice->sign($invoice), $request->GuardarEn."\\FES-{$resolution->next_consecutive}");
-        else
-            $sendBillSync->contentFile = $this->zipBase64($company, $resolution, $signInvoice->sign($invoice), storage_path("app/public/{$company->identification_number}/FES-{$resolution->next_consecutive}"));
+        }else{ $sendBillSync->contentFile = $this->zipBase64($company, $resolution, $signInvoice->sign($invoice), storage_path("app/public/{$company->identification_number}/FES-{$resolution->next_consecutive}")); }
 
-        
+        $QRStr = $this->createPDF($user, $company, $customer, $typeDocument, $resolution, $date, $time, $paymentForm, $request, $signInvoice->ConsultarCUFE(), "INVOICE", $withHoldingTaxTotal, $notes, $healthfields);
+
+        $filename = '';
+        $respuestadian = '';
+        $typeDocument = TypeDocument::findOrFail(7); //tipo de documento es AttachedDocument code = 89, prefix = at
+
+        $ar = new \DOMDocument;
+
+        try {
+            $respuestadian = $sendBillSync->signToSend(storage_path("app/public/{$company->identification_number}/ReqFE-{$resolution->next_consecutive}.xml"))->getResponseToObject(storage_path("app/public/{$company->identification_number}/RptaFE-{$resolution->next_consecutive}.xml"));
+            if(isset($respuestadian->html)){
+                return ['success' => false, 'message' => "El servicio de la DIAN no se encuentra disponible, intente mas tarde."];
+            }
+            
+            if($respuestadian->Envelope->Body->SendBillSyncResponse->SendBillSyncResult->IsValid == 'true'){
+                $filename = str_replace('nd', 'ad', str_replace('nc', 'ad', str_replace('fv', 'ad', $respuestadian->Envelope->Body->SendBillSyncResponse->SendBillSyncResult->XmlFileName)));
+                if($request->atacheddocument_name_prefix)
+                    $filename = $request->atacheddocument_name_prefix.$filename;
+                $cufecude = $respuestadian->Envelope->Body->SendBillSyncResponse->SendBillSyncResult->XmlDocumentKey;
+                //$invoice_doc->state_document_id = 1;
+                //$invoice_doc->cufe = $cufecude;
+                //$invoice_doc->save();
+                $signedxml = file_get_contents(storage_path("app/xml/{$company->id}/".$respuestadian->Envelope->Body->SendBillSyncResponse->SendBillSyncResult->XmlFileName.".xml"));
+                if(strpos($signedxml, "</Invoice>") > 0)
+                    $td = '/Invoice';
+                else
+                    if(strpos($signedxml, "</CreditNote>") > 0)
+                        $td = '/CreditNote';
+                    else
+                        $td = '/DebitNote';
+                $appresponsexml = base64_decode($respuestadian->Envelope->Body->SendBillSyncResponse->SendBillSyncResult->XmlBase64Bytes);
+                $ar->loadXML($appresponsexml);
+                $fechavalidacion = $ar->documentElement->getElementsByTagName('IssueDate')->item(0)->nodeValue;
+                $horavalidacion = $ar->documentElement->getElementsByTagName('IssueTime')->item(0)->nodeValue;
+                //$document_number = $this->ValueXML($signedxml, $td."/cbc:ID/");
+                // Create XML AttachedDocument
+                $attacheddocument = $this->createXML(compact('user', 'company', 'customer', 'resolution', 'typeDocument', 'cufecude', 'signedxml', 'appresponsexml', 'fechavalidacion', 'horavalidacion', 'document_number'));
+
+                // Signature XML
+            }
+
+        } catch (\Throwable $th) {
+            //throw $th;
+        }
 
     }
 

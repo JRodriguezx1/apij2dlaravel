@@ -32,7 +32,7 @@ trait DocumentTrait
         'payment_method_id' => 10,
     ];
 
-    protected function getTag($document, $tagName, $item = 0, $attribute = NULL, $attribute_value = NULL)
+    protected function getTag($document, $tagName, $item = 0, $attribute = NULL, $attribute_value = NULL) //utilizado en StateController
     {
         if (is_string($document)){
             $xml = $document;
@@ -42,19 +42,15 @@ trait DocumentTrait
 
         $tag = $document->documentElement->getElementsByTagName($tagName);
 
-        if (is_null($tag->item(0))) {
-            return;
-        }
+        if(is_null($tag->item(0)))return;
 
-        if($attribute)
+        if($attribute){
             if($attribute_value){
                 $tag->item($item)->setAttribute($attribute, $attribute_value);
                 return;
             }
-            else
-                return $tag->item($item)->getAttribute($attribute);
-        else
-            return $tag->item($item);
+            else {return $tag->item($item)->getAttribute($attribute); }
+        }else{ return $tag->item($item); }
     }
 
     protected function validarDigVerifDIAN($nit)
@@ -76,16 +72,16 @@ trait DocumentTrait
             if ($resta == 1)
                 return $resta;
             else
-                if($resta != 0)
+                if($resta != 0){
                     return 11 - $resta;
-                else
-                    return $resta;
-        } else {
+                }else{ return $resta; }
+        }else{
             return FALSE;
         }
     }
 
 
+    //VERIFICAR CERTIFICADO, LLANANDO AL CONTROLADOR CONFIGURATIONCONTROLLER
     function verify_certificate($user = FALSE){
         $c = new ConfigurationController();
         $certificate_end_date = new DateTime(Carbon::parse(str_replace("/", "-", $c->CertificateEndDate($user)))->format('Y-m-d'));
@@ -109,6 +105,7 @@ trait DocumentTrait
     }
     
     
+    //CREANDO EL XML
     protected function createXML(array $data)
     {
         if($data['typeDocument']['code'] === '01' or $data['typeDocument']['code'] === '02' or $data['typeDocument']['code'] === '03' or $data['typeDocument']['code'] === '05' or $data['typeDocument']['code'] === '95' or $data['typeDocument']['code'] === '91' or $data['typeDocument']['code'] === '92' or $data['typeDocument']['code'] === '20' or $data['typeDocument']['code'] === '93' or $data['typeDocument']['code'] === '94'){
@@ -199,6 +196,7 @@ trait DocumentTrait
         }
     }
 
+    //CREANDO EL ZIP DEL XML
     protected function zipBase64(Company $company, Resolution $resolution, Sign $sign, $GuardarEn = false, $batch = false){ //GuardarEn = app/public/1094955142/FES-SETUP994411000
         
         $dir = preg_replace("/[\r\n|\n|\r]+/", "", "zip/{$resolution->company_id}");
@@ -238,7 +236,8 @@ trait DocumentTrait
     }
 
 
-     protected function getFileName(Company $company, Resolution $resolution, $typeDocumentID = null, $extension = '.xml')
+    //OBTENER NOMBRE PARA EL XML Y PARA EL ZIP
+    protected function getFileName(Company $company, Resolution $resolution, $typeDocumentID = null, $extension = '.xml')
     {
         $date = now();
         $prefix = (is_null($typeDocumentID)) ? $resolution->type_document->prefix : TypeDocument::findOrFail($typeDocumentID)->prefix;
@@ -272,58 +271,37 @@ trait DocumentTrait
     }
 
 
+    //CREANDO EL PDF DE LA FACTURA - INVOICE
     protected function createPDF($user, $company, $customer, $typeDocument, $resolution, $date, $time, $paymentForm, $request, $cufecude, $tipodoc = "INVOICE", $withHoldingTaxTotal = NULL, $notes = NULL, $healthfields)
     {
-        $template_json = false;
         set_time_limit(0); // sin limite de timepo de ejecucion
-        //si hay plantilla indicada
-        if(isset($request->invoice_template))
-          if(!is_null($request->invoice_template) && ($request->invoice_template <> '')){
-            if(password_verify($company->identification_number, $request->template_token)){
-                $template_pdf = $request->invoice_template;
-                $template_json = true;
-            }
-            else
-                $template_pdf = env("GRAPHIC_REPRESENTATION_TEMPLATE", 2);
-          }
-          else
-            $template_pdf = env("GRAPHIC_REPRESENTATION_TEMPLATE", 2);
-        else  //si no hay plantilla personalida $template_pdf toma el valor de "GRAPHIC_REPRESENTATION_TEMPLATE" o 2
-          $template_pdf = env("GRAPHIC_REPRESENTATION_TEMPLATE", 2);
+        $template_pdf = 2;
         ini_set("pcre.backtrack_limit", "5000000");
         $QRStr = '';
 
-        define("DOMPDF_ENABLE_REMOTE", true);
+        define("DOMPDF_ENABLE_REMOTE", true);  //DOMPDF_ENABLE_REMOTE true, Permite cargar contenido de cualquier URL (http/https) Habilitando la capacidad de cargar recursos remotos (imágenes, CSS, fuentes) desde URLs externas cuando se genera un PDF.
 
         //Si se pasa el logo
-        if(isset($request->establishment_logo)){
-            $filenameLogo   = storage_path("app/public/{$company->identification_number}/alternate_{$company->identification_number}{$company->dv}.jpg");
-            $this->storeLogo($request->establishment_logo);
-        }
-        else
-            $filenameLogo   = storage_path("app/public/{$company->identification_number}/{$company->identification_number}{$company->dv}.jpg");
-
-        $firma_facturacion = null;
-        if(isset($request->firma_facturacion)){
-            $firma_facturacion = "data:image/jpg;base64, ".$request->firma_facturacion;
-        }
+        if(isset($request->establishment_logo)){ //$request->establishment_logo es la imagen jpg en base64
+            $filenameLogo = storage_path("app/public/{$company->identification_number}/alternate_{$company->identification_number}{$company->dv}.jpg"); //obtener la ruta de la imagen jpg
+            $this->storeLogo($request->establishment_logo); //almacenar el logo que viene en base 64
+        }else{ $filenameLogo   = storage_path("app/public/{$company->identification_number}/{$company->identification_number}{$company->dv}.jpg"); }
 
         //si existe el contenido del logo
         if(file_exists($filenameLogo)){
-            $logoBase64     = base64_encode(file_get_contents($filenameLogo));
-            $imgLogo        = "data:image/jpg;base64, ".$logoBase64;
-        } else {
-            $logoBase64     = NULL;
-            $imgLogo        = NULL;
+            $logoBase64 = base64_encode(file_get_contents($filenameLogo));
+            $imgLogo = "data:image/jpg;base64, ".$logoBase64;
+        } else{
+            $logoBase64 = NULL; $imgLogo = NULL;
         }
 
-        if($tipodoc == "ND")
-            $totalbase = $request->requested_monetary_totals['line_extension_amount'];
-        else
-            $totalbase = $request->legal_monetary_totals['line_extension_amount'];
+        $firma_facturacion = null;
+
+        $totalbase = $request->legal_monetary_totals['line_extension_amount'];
+        if($tipodoc == "ND")$totalbase = $request->requested_monetary_totals['line_extension_amount'];
 
         //CALCULAR QR EN BASE-64 PARA HAB Y PRODUCCION
-        if($tipodoc == "INVOICE" || $tipodoc == "POS"){//Si tipo de documento es invoice o POS
+        if($tipodoc == "INVOICE"){//Si tipo de documento es invoice - Factura
             if($company->type_environment_id == 2){ //si es ambiente de pruebas
                 if(isset($request->tax_totals[0]['tax_amount'])){ //si esta definido tax total, se establece el impuesto IVA
                     $qrBase64 = base64_encode(QrCode::format('svg') //me codifica en base 64 el qr del png y establece URL de habilitacion
@@ -361,116 +339,62 @@ trait DocumentTrait
                 }
             }
 
-             $imageQr    =  "data:image/svg+xml;base64, ".$qrBase64;
-
-            if($template_json){
-                    if($tipodoc == 'POS')
-                        $pdf = $this->initMPdf('pos', $template_pdf);
-                    else
-                        $pdf = $this->initMPdf('invoice', $template_pdf);
-                    $pdf->SetHTMLHeader(View::make("pdfs.".strtolower($tipodoc).".header".$template_pdf, compact("user", "company", "customer", "resolution", "date", "time", "paymentForm", "request", "cufecude", "imageQr", "imgLogo", "withHoldingTaxTotal", "notes", "healthfields", "firma_facturacion")));
-                    $pdf->SetHTMLFooter(View::make("pdfs.".strtolower($tipodoc).".footer".$template_pdf, compact("user", "company", "customer", "resolution", "date", "time", "paymentForm", "request", "cufecude", "imageQr", "imgLogo", "withHoldingTaxTotal", "notes", "healthfields", "firma_facturacion")));
-                    $pdf->WriteHTML(View::make("pdfs.".strtolower($tipodoc).".template".$template_pdf, compact("user", "company", "customer", "resolution", "date", "time", "paymentForm", "request", "cufecude", "imageQr", "imgLogo", "withHoldingTaxTotal", "notes", "healthfields", "firma_facturacion")), HTMLParserMode::HTML_BODY);
-            }else{
-                if($tipodoc == 'POS')
-                    $pdf = $this->initMPdf('pos', $template_pdf);
-                else
-                    $pdf = $this->initMPdf(); //inicializar mpdf para facturas
-                    $pdf->SetHTMLHeader(View::make("pdfs.".strtolower($tipodoc).".header", compact("user", "company", "customer", "resolution", "date", "time", "paymentForm", "request", "cufecude", "imageQr", "imgLogo", "withHoldingTaxTotal", "notes", "healthfields", "firma_facturacion")));
-                    $pdf->SetHTMLFooter(View::make("pdfs.".strtolower($tipodoc).".footer", compact("user", "company", "customer", "resolution", "date", "time", "paymentForm", "request", "cufecude", "imageQr", "imgLogo", "withHoldingTaxTotal", "notes", "healthfields", "firma_facturacion")));
-                    $pdf->WriteHTML(View::make("pdfs.".strtolower($tipodoc).".template".$template_pdf, compact("user", "company", "customer", "resolution", "date", "time", "paymentForm", "request", "cufecude", "imageQr", "imgLogo", "withHoldingTaxTotal", "notes", "healthfields", "firma_facturacion")), HTMLParserMode::HTML_BODY);
-            }
+            $imageQr    =  "data:image/svg+xml;base64, ".$qrBase64;
+            
+            $pdf = $this->initMPdf(); //inicializar mpdf para facturas
+            $pdf->SetHTMLHeader(View::make("pdfs.".strtolower($tipodoc).".header", compact("user", "company", "customer", "resolution", "date", "time", "paymentForm", "request", "cufecude", "imageQr", "imgLogo", "withHoldingTaxTotal", "notes", "healthfields", "firma_facturacion")));
+            $pdf->SetHTMLFooter(View::make("pdfs.".strtolower($tipodoc).".footer", compact("user", "company", "customer", "resolution", "date", "time", "paymentForm", "request", "cufecude", "imageQr", "imgLogo", "withHoldingTaxTotal", "notes", "healthfields", "firma_facturacion")));
+            $pdf->WriteHTML(View::make("pdfs.".strtolower($tipodoc).".template".$template_pdf, compact("user", "company", "customer", "resolution", "date", "time", "paymentForm", "request", "cufecude", "imageQr", "imgLogo", "withHoldingTaxTotal", "notes", "healthfields", "firma_facturacion")), HTMLParserMode::HTML_BODY);
 
             $filename = storage_path("app/public/{$company->identification_number}/FES-{$resolution->next_consecutive}.pdf");  //ubicacion en donde se guardara el PDF.
              
-        }//fin tipo de documentos INVOICE o POS
+        }//fin tipo de documentos INVOICE
 
         $pdf->Output($filename);
         return $QRStr;
-
     }
 
 
-    protected function initMPdf(string $type = 'invoice', string $template = null): Mpdf
-    //$type: tipo de documento (invoice, pos),     $template: numero/idenificador de plantilla es opcional
-    {
+    //INICIALIZANDO LIBREARIA MPDF
+    protected function initMPdf(string $type = 'invoice'): Mpdf
+    { //$type: tipo de documento (invoice, pos),     $template: numero/idenificador de plantilla es opcional
         //Configuración Inicial de Fuentes, Obtiene configuraciones predeterminadas de mPDF
         $defaultConfig = (new ConfigVariables())->getDefaults();
         $fontDirs = $defaultConfig['fontDir'];
         $defaultFontConfig = (new FontVariables())->getDefaults();
         $fontData = $defaultFontConfig['fontdata'];
 
-        //Dimensiones de Página, Define tamaños diferentes para facturas vs tickets POS
-        if($type == 'pos'){
-            $pageWidth = 80;    // Ancho para POS (tickets)
-            $pageHeight = 297;  // Largo estándar para rollos
-        }
-        else{
-            $pageWidth = 219;   // Ancho carta en mm
-            $pageHeight = 279;  // Alto carta en mm
-        }
+        //Dimensiones de Página, Define tamaños para facturas
+        $pageWidth = 219;   // Ancho carta en mm
+        $pageHeight = 279;  // Alto carta en mm
 
-        //Configuración de Márgenes
-        $margin_left = '5';
-        $margin_right = '5';
-        $margin_top = '60';
-        $margin_bottom = '40';
-
-        //Carga de Configuración Personalizada (JSON) si existe deacuerdo a variable $template
-        $filename = base_path('resources/views/pdfs/' . $type . '/config'.$template.'.json');
-        if (file_exists($filename)) {
-            $jsonD =  file_get_contents('config'.$template.'.json');
-            $margin = json_decode($jsonD, true);
-            if(isset($margin)){
-                $margin_top = $margin['top'];
-                $margin_right = $margin['right'];
-                $margin_bottom = $margin['bottom'];
-                $margin_left = $margin['left'];
-            }
-        }
-        if($template){
-            $pdf = new Mpdf([
-                'fontDir' => array_merge($fontDirs, [base_path('public/fonts/roboto/')]),
-                'fontdata' => $fontData + [
-                    'Roboto' => [
-                        'R' => 'Roboto-Regular.ttf',
-                        'B' => 'Roboto-Bold.ttf',
-                        'I' => 'Roboto-Italic.ttf',
-                    ]
-                ],
-                'default_font' => 'Roboto',
-                'margin_left' => $margin_left,
-                'margin_right' => $margin_right,
-                'margin_top' => $margin_top,
-                'margin_bottom' => $margin_bottom ,
-                'margin_header' => 5,
-                'margin_footer' => 2,
-                'format' => [$pageWidth, $pageHeight], // Establece el tamaño de la página
-            ]);
-        }else{  //si no plantilla enviada
-            $pdf = new Mpdf([
-                'fontDir' => array_merge($fontDirs, [base_path('public/fonts/roboto/'),]),
-                'fontdata' => $fontData + [
-                    'Roboto' => [
-                        'R' => 'Roboto-Regular.ttf',
-                        'B' => 'Roboto-Bold.ttf',
-                        'I' => 'Roboto-Italic.ttf',
-                    ]
-                ],
-                'default_font' => 'Roboto',
-                'margin_left' => 5,
-                'margin_top' => 35,
-                'margin_bottom' => 5,
-                'margin_header' => 5,
-                'margin_footer' => 2,
-                'format' => [$pageWidth, $pageHeight], // Establece el tamaño de la página
-            ]);
-        }
-        if($template)
-            $pdf->WriteHTML(file_get_contents(base_path('resources/views/pdfs/' . $type . '/styles'.$template.'.css')), HTMLParserMode::HEADER_CSS);
-        else
-            $pdf->WriteHTML(file_get_contents(base_path('resources/views/pdfs/' . $type . '/styles.css')), HTMLParserMode::HEADER_CSS);
+        //inicializar mpdf
+        $pdf = new Mpdf([
+            'fontDir' => array_merge($fontDirs, [base_path('public/fonts/roboto/'),]),
+            'fontdata' => $fontData + [
+                'Roboto' => [
+                    'R' => 'Roboto-Regular.ttf',
+                    'B' => 'Roboto-Bold.ttf',
+                    'I' => 'Roboto-Italic.ttf',
+                ]
+            ],
+            'default_font' => 'Roboto',
+            'margin_left' => 5,
+            'margin_right' => 5,
+            'margin_top' => 35,
+            'margin_bottom' => 5,
+            'margin_header' => 5,
+            'margin_footer' => 2,
+            'format' => [$pageWidth, $pageHeight], // Establece el tamaño de la página
+        ]);
+        
+        $pdf->WriteHTML(file_get_contents(base_path('resources/views/pdfs/'.$type.'/styles.css')), HTMLParserMode::HEADER_CSS);
         return $pdf;
+    }
+
+
+    protected function ValueXML($stringXML, $xpath){
+
     }
     
 }
