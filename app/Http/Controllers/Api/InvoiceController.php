@@ -27,8 +27,9 @@ use App\Traits\DocumentTrait;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
-use ubl21dian\Templates\SOAP\SendBillSync;
 use ubl21dian\XAdES\SignInvoice;
+use ubl21dian\XAdES\SignAttachedDocument;
+use ubl21dian\Templates\SOAP\SendBillSync;
 use ubl21dian\Templates\SOAP\SendTestSetAsync;
 
 
@@ -249,8 +250,9 @@ class InvoiceController extends Controller
             }
             
             if($respuestadian->Envelope->Body->SendBillSyncResponse->SendBillSyncResult->IsValid == 'true'){
+                //nombre del attacheddocument colocando 'ad'
                 $filename = str_replace('nd', 'ad', str_replace('nc', 'ad', str_replace('fv', 'ad', $respuestadian->Envelope->Body->SendBillSyncResponse->SendBillSyncResult->XmlFileName)));
-                if($request->atacheddocument_name_prefix)
+                if($request->atacheddocument_name_prefix)  //si se pasa el nombre para el attacheddocument
                     $filename = $request->atacheddocument_name_prefix.$filename;
                 $cufecude = $respuestadian->Envelope->Body->SendBillSyncResponse->SendBillSyncResult->XmlDocumentKey;
                 //$invoice_doc->state_document_id = 1;
@@ -269,10 +271,15 @@ class InvoiceController extends Controller
                 $fechavalidacion = $ar->documentElement->getElementsByTagName('IssueDate')->item(0)->nodeValue;
                 $horavalidacion = $ar->documentElement->getElementsByTagName('IssueTime')->item(0)->nodeValue;
                 //$document_number = $this->ValueXML($signedxml, $td."/cbc:ID/");
+
                 // Create XML AttachedDocument
                 $attacheddocument = $this->createXML(compact('user', 'company', 'customer', 'resolution', 'typeDocument', 'cufecude', 'signedxml', 'appresponsexml', 'fechavalidacion', 'horavalidacion', 'document_number'));
 
                 // Signature XML
+                $signAttachedDocument = new SignAttachedDocument($company->certificate->path, $company->certificate->password);
+                $signAttachedDocument->GuardarEn = storage_path("app/public/{$company->identification_number}/{$filename}.xml");
+                
+                
             }
 
         } catch (\Throwable $th) {
