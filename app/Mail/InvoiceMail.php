@@ -66,8 +66,6 @@ class InvoiceMail extends Mailable
                         $nameZIP = $this->zipEmail($this->GuardarEn."\\{$this->filename}.xml", $this->GuardarEn."\\PDF-{$this->invoice[0]->prefix}{$this->invoice[0]->number}.pdf");
                     return $this->view('mails.mail')->subject("{$this->company->identification_number};{$this->company->user->name};{$this->invoice[0]->prefix}{$this->invoice[0]->number};{$this->invoice[0]->type_document->code};{$this->company->user->name}")
                                                     ->from(Config::get('mail.from.address'), Config::get('mail.from.name'))
-//                                                    ->from(env('MAIL_FROM_ADDRESS', env('MAIL_USERNAME')), env('MAIL_FROM_NAME', env('APP_NAME')))
-//                                                    ->from(env('MAIL_USERNAME'))
                                                     ->attach($nameZIP);
                 }
                 else{
@@ -77,8 +75,6 @@ class InvoiceMail extends Mailable
                         $nameZIP = $this->zipEmail($this->GuardarEn."\\{$this->filename}.xml", $this->GuardarEn."\\PDF-{$this->invoice[0]->prefix}{$this->invoice[0]->number}.pdf");
                     return $this->view('mails.mail')->subject("{$this->company->identification_number};{$this->company->user->name};{$this->invoice[0]->prefix}{$this->invoice[0]->number};{$this->invoice[0]->type_document->code};{$this->company->user->name}")
                                                     ->from(Config::get('mail.from.address'), Config::get('mail.from.name'))
-//                                                    ->from(env('MAIL_FROM_ADDRESS', config('mail.username')), env('MAIL_FROM_NAME', env('APP_NAME')))
-//                                                    ->from(config('mail.username'))
                                                     ->attach($nameZIP);
                 }
             else
@@ -89,8 +85,6 @@ class InvoiceMail extends Mailable
                         $nameZIP = $this->zipEmail($this->GuardarEn."\\{$this->filename}.xml", $this->GuardarEn."\\".$this->invoice[0]->pdf);
                     return $this->view('mails.mail')->subject("{$this->company->identification_number};{$this->company->user->name};{$this->invoice[0]->prefix}{$this->invoice[0]->number};{$this->invoice[0]->type_document->code};{$this->company->user->name}")
                                                     ->from(Config::get('mail.from.address'), Config::get('mail.from.name'))
-//                                                    ->from(env('MAIL_FROM_ADDRESS', env('MAIL_USERNAME')), env('MAIL_FROM_NAME', env('APP_NAME')))
-//                                                    ->from(env('MAIL_USERNAME'))
                                                     ->attach($nameZIP);
                 }
                 else{
@@ -100,8 +94,6 @@ class InvoiceMail extends Mailable
                         $nameZIP = $this->zipEmail($this->GuardarEn."\\{$this->filename}.xml", $this->GuardarEn."\\{$this->invoice[0]->pdf}");
                     return $this->view('mails.mail')->subject("{$this->company->identification_number};{$this->company->user->name};{$this->invoice[0]->prefix}{$this->invoice[0]->number};{$this->invoice[0]->type_document->code};{$this->company->user->name}")
                                                     ->from(Config::get('mail.from.address'), Config::get('mail.from.name'))
-//                                                    ->from(env('MAIL_FROM_ADDRESS', config('mail.username')), env('MAIL_FROM_NAME', env('APP_NAME')))
-//                                                    ->from(config('mail.username'))
                                                     ->attach($nameZIP);
                 }
         else
@@ -113,8 +105,6 @@ class InvoiceMail extends Mailable
                         $nameZIP = $this->zipEmail(storage_path("app/public/{$this->company->identification_number}/{$this->filename}.xml"), storage_path("app/public/{$this->company->identification_number}/PDF-{$this->invoice[0]->prefix}{$this->invoice[0]->number}.pdf"));
                     return $this->view('mails.mail')->subject("{$this->company->identification_number};{$this->company->user->name};{$this->invoice[0]->prefix}{$this->invoice[0]->number};{$this->invoice[0]->type_document->code};{$this->company->user->name}")
                                                     ->from(Config::get('mail.from.address'), Config::get('mail.from.name'))
-//                                                    ->from(env('MAIL_FROM_ADDRESS', env('MAIL_USERNAME')), env('MAIL_FROM_NAME', env('APP_NAME')))
-//                                                    ->from(env('MAIL_USERNAME'))
                                                     ->attach($nameZIP);
                 }
                 else{
@@ -124,8 +114,6 @@ class InvoiceMail extends Mailable
                         $nameZIP = $this->zipEmail(storage_path("app/public/{$this->company->identification_number}/{$this->filename}.xml"), storage_path("app/public/{$this->company->identification_number}/PDF-{$this->invoice[0]->prefix}{$this->invoice[0]->number}.pdf"));
                     return $this->view('mails.mail')->subject("{$this->company->identification_number};{$this->company->user->name};{$this->invoice[0]->prefix}{$this->invoice[0]->number};{$this->invoice[0]->type_document->code};{$this->company->user->name}")
                                                     ->from(Config::get('mail.from.address'), Config::get('mail.from.name'))
-//                                                    ->from(env('MAIL_FROM_ADDRESS', config('mail.username')), env('MAIL_FROM_NAME', env('APP_NAME')))
-//                                                    ->from(config('mail.username'))
                                                     ->attach($nameZIP);
                 }
             else{
@@ -136,8 +124,6 @@ class InvoiceMail extends Mailable
                         $nameZIP = $this->zipEmail(storage_path("app/public/{$this->company->identification_number}/{$this->filename}.xml"), storage_path("app/public/{$this->company->identification_number}/{$this->invoice[0]->pdf}"));
                     return $this->view('mails.mail')->subject("{$this->company->identification_number};{$this->company->user->name};{$this->invoice[0]->prefix}{$this->invoice[0]->number};{$this->invoice[0]->type_document->code};{$this->company->user->name}")
                                                     ->from(Config::get('mail.from.address'), Config::get('mail.from.name'))
-//                                                    ->from(env('MAIL_FROM_ADDRESS', env('MAIL_USERNAME')), env('MAIL_FROM_NAME', env('APP_NAME')))
-//                                                    ->from(env('MAIL_USERNAME'))
                                                     ->attach($nameZIP);
                 }
                 else{
@@ -147,8 +133,6 @@ class InvoiceMail extends Mailable
                         $nameZIP = $this->zipEmail(storage_path("app/public/{$this->company->identification_number}/{$this->filename}.xml"), storage_path("app/public/{$this->company->identification_number}/{$this->invoice[0]->pdf}"));
                     return $this->view('mails.mail')->subject("{$this->company->identification_number};{$this->company->user->name};{$this->invoice[0]->prefix}{$this->invoice[0]->number};{$this->invoice[0]->type_document->code};{$this->company->user->name}")
                                                     ->from(Config::get('mail.from.address'), Config::get('mail.from.name'))
-//                                                    ->from(env('MAIL_FROM_ADDRESS', config('mail.username')), env('MAIL_FROM_NAME', env('APP_NAME')))
-//                                                    ->from(config('mail.username'))
                                                     ->attach($nameZIP);
                 }
             }

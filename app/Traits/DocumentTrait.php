@@ -260,6 +260,29 @@ trait DocumentTrait
     }
 
 
+    protected function zipEmail($xml, $pdf)
+    {
+        $nameXML = preg_replace("/[\r\n|\n|\r]+/", "", $xml);
+        $namePDF = preg_replace("/[\r\n|\n|\r]+/", "", $pdf);
+        $nameZip = preg_replace("/[\r\n|\n|\r]+/", "", substr($xml, 0, strlen($xml) - 3)."zip");
+        $nameAD = preg_replace("/[\r\n|\n|\r]+/", "", substr($xml, 0, strlen($xml) - 4));
+
+        $zip = new ZipArchive();
+
+        $result_code = $zip->open($nameZip, ZipArchive::CREATE);
+        $zip->addFile($nameXML, basename($nameXML));
+        $zip->addFile($namePDF, str_replace('xml', 'pdf', basename($nameXML)));
+
+        $R = substr($nameAD, 0, strlen($nameAD) - strlen(basename($nameAD)));
+        $listado = glob($R.'anx-*'.basename($nameAD).'.*');
+        foreach($listado as $elemento){
+            $zip->addFile($elemento, basename($elemento));
+        }
+        $zip->close();
+        return $nameZip;
+    }
+
+    
     function days_between_dates($date_from, $date_to){
         $date_initial = new DateTime(Carbon::parse($date_from)->format('Y-m-d'));
         $date_final = new DateTime(Carbon::parse($date_to)->format('Y-m-d'));
@@ -394,7 +417,21 @@ trait DocumentTrait
 
 
     protected function ValueXML($stringXML, $xpath){
-
+        if(substr($xpath, 0, 1) != '/')
+            return NULL;
+        $search = substr($xpath, 1, strpos(substr($xpath, 1), '/'));
+        $posinicio = strpos($stringXML, "<".$search);
+        if($posinicio == 0 and $search != 's:Envelope')
+           return NULL;
+        $posinicio = strpos($stringXML, ">", $posinicio) + 1;
+        $posCierre = strpos($stringXML, "</".$search.">", $posinicio);
+        if($posCierre == 0)
+            return NULL;
+        $valorXML = substr($stringXML, $posinicio, $posCierre - $posinicio);
+        if(strcmp(substr($xpath, strpos($xpath, $search) + strlen($search)), '/') != 0)
+            return $this->ValueXML($valorXML, substr($xpath, strpos($xpath, $search) + strlen($search)));
+        else
+            return $valorXML;
     }
     
 }

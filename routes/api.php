@@ -47,13 +47,13 @@ Route::middleware('auth.token')->group(function(){
 
         //Invoice
         Route::prefix('/invoice')->group(function(){
-            Route::post('/{testSetId}', [InvoiceController::class, 'testSetStore']);
-            Route::post('/', [InvoiceController::class, 'store']);
+            Route::post('/{testSetId}', [InvoiceController::class, 'testSetStore']);  //enviar una factura en modo habilitacion
+            Route::post('/', [InvoiceController::class, 'store']); //enviar una factura electronica
         });
 
         //Status
         Route::prefix('/status')->group(function(){
-            Route::post('/zip/{trackId}/{GuardarEn?}', [StateController::class, 'zip']);
+            Route::post('/zip/{trackId}/{GuardarEn?}', [StateController::class, 'zip']);  //validar el estado del zip de una factura enviada
             Route::post('/document/{trackId}/{GuardarEn?}', [StateController::class, 'document']);
         });
     });
