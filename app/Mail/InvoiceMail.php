@@ -15,7 +15,7 @@ use App\Models\User;
 
 class InvoiceMail extends Mailable
 {
-    use DocumentTrait, Queueable, SerializesModels;
+    use DocumentTrait, Queueable, SerializesModels;  // permiten que este correo pueda ser encolado (queue()).
 
     public $invoice;
     public $customer;
