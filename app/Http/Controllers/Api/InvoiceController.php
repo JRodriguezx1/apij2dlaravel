@@ -293,6 +293,7 @@ class InvoiceController extends Controller
                         if($customer->company->identification_number != '222222222222'){
                             try{
                                 //Enviar email de la factura al cliente consumidor
+                                $invoice[0] = ['prefix'=>0, 'number'=>0, 'type_document'=>{'code'=>1}];
                                 Mail::to($customer->email)->send(new InvoiceMail($invoice, $customer, $company, FALSE, FALSE, $filename, TRUE, $request));
                                 //enviar email de la factura a mi o negocio
                                 if($request->sendmailtome)
