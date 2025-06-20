@@ -29,6 +29,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\InvoiceMail;
 use Illuminate\Support\Facades\Storage;
+use stdClass;
 use ubl21dian\XAdES\SignInvoice;
 use ubl21dian\XAdES\SignAttachedDocument;
 use ubl21dian\Templates\SOAP\SendBillSync;
@@ -59,7 +60,7 @@ class InvoiceController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(InvoiceRequest $request)
     {
         //
         //obtener usuario
@@ -119,7 +120,7 @@ class InvoiceController extends Controller
             $calculationratedate = $request->calculationratedate;
         }
         else{
-            $idcurrency = TypeCurrency::findOrFail($invoice_doc->currency_id);
+            $idcurrency = TypeCurrency::findOrFail(35/*$invoice_doc->currency_id*/);
             $calculationrate = 1;
             $calculationratedate = Carbon::now()->format('Y-m-d');
         }
@@ -245,6 +246,17 @@ class InvoiceController extends Controller
 
         $ar = new \DOMDocument;
 
+        
+
+        ///////////////////// validar y provar envio de solo email ////////////////////////
+        $objtypedocument = new stdClass();
+        $objtypedocument->code = 1;
+        $invoice[0] = ['prefix'=>0, 'number'=>0, 'type_document'=>$objtypedocument];
+        Mail::to($customer->email)->send(new InvoiceMail($invoice, $customer, $company, FALSE, FALSE, $filename, TRUE, $request));
+        ////////////////////////////////////////////////////
+
+
+        /*
         try{
             $respuestadian = $sendBillSync->signToSend(storage_path("app/public/{$company->identification_number}/ReqFE-{$resolution->next_consecutive}.xml"))->getResponseToObject(storage_path("app/public/{$company->identification_number}/RptaFE-{$resolution->next_consecutive}.xml"));
             if(isset($respuestadian->html)){
@@ -293,7 +305,9 @@ class InvoiceController extends Controller
                         if($customer->company->identification_number != '222222222222'){
                             try{
                                 //Enviar email de la factura al cliente consumidor
-                                $invoice[0] = ['prefix'=>0, 'number'=>0, 'type_document'=>{'code'=>1}];
+                                $objtypedocument = new stdClass();
+                                $objtypedocument->code = 1;
+                                $invoice[0] = ['prefix'=>0, 'number'=>0, 'type_document'=>$objtypedocument];
                                 Mail::to($customer->email)->send(new InvoiceMail($invoice, $customer, $company, FALSE, FALSE, $filename, TRUE, $request));
                                 //enviar email de la factura a mi o negocio
                                 if($request->sendmailtome)
@@ -311,11 +325,11 @@ class InvoiceController extends Controller
             }
         } catch (\Throwable $th) {
             //throw $th;
-        }
+        }*/
 
         return [
                 'message' => "{$typeDocument->name} #{$resolution->next_consecutive} generada con éxito",
-                'send_email_success' => (null !== $invoice && $request->sendmail == true) ?? $invoice[0]->send_email_success == 1,
+                /*'send_email_success' => (null !== $invoice && $request->sendmail == true) ?? $invoice[0]->send_email_success == 1,
                 'send_email_date_time' => (null !== $invoice && $request->sendmail == true) ?? Carbon::now()->format('Y-m-d H:i'),
                 //'ResponseDian' => $respuestadian,
                 'invoicexml'=>base64_encode(file_get_contents(storage_path("app/public/{$company->identification_number}/FES-{$resolution->next_consecutive}.xml"))),
@@ -330,7 +344,7 @@ class InvoiceController extends Controller
                 'cufe' => $signInvoice->ConsultarCUFE(),
                 'QRStr' => $QRStr,
                 'certificate_days_left' => $certificate_days_left,
-                'resolution_days_left' => $this->days_between_dates(Carbon::now()->format('Y-m-d'), $resolution->date_to),
+                'resolution_days_left' => $this->days_between_dates(Carbon::now()->format('Y-m-d'), $resolution->date_to),*/
             ];
 
     }
