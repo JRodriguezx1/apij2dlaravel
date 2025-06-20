@@ -246,9 +246,9 @@ class InvoiceController extends Controller
 
         $ar = new \DOMDocument;
 
-        
 
-        ///////////////////// validar y provar envio de solo email ////////////////////////
+
+        ///////////////////// validar y probar envio de solo email ////////////////////////
         $objtypedocument = new stdClass();
         $objtypedocument->code = 1;
         $invoice[0] = ['prefix'=>0, 'number'=>0, 'type_document'=>$objtypedocument];
