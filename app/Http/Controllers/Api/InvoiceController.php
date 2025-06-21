@@ -249,12 +249,21 @@ class InvoiceController extends Controller
 
 
         ///////////////////// validar y probar envio de solo email ////////////////////////
+        $objtype_document = new stdClass();
+        $objtype_document->code = 6;
         $objtypedocument = new stdClass();
         $objtypedocument->code = 1;
-        $filename = "FES-".$sendBillSync->fileName;
+        $objtypedocument->prefix = 'SETP';
+        $objtypedocument->number = 994411022;
+        $objtypedocument->pdf = "FES-$resolution->next_consecutive.pdf";
+        $objtypedocument->total = 33000;
+        $objtypedocument->created_at = $date;
+        $objtypedocument->type_document = $objtype_document;
+
+        $filename = "FES-".$resolution->next_consecutive;
         $invoice = [];
-        $invoice[0] = ['prefix'=>'SETP', 'number'=>994411022, 'pdf'=>"FES-$resolution->next_consecutive.pdf", 'type_document'=>$objtypedocument];
-        //Mail::to($customer->email)->send(new InvoiceMail($invoice, $customer, $company, FALSE, FALSE, $filename, TRUE, $request));
+        $invoice[0] = $objtypedocument;
+        Mail::to($customer->email)->send(new InvoiceMail($invoice, $customer, $company, FALSE, FALSE, $filename, TRUE, $request));
         ////////////////////////////////////////////////////
 
 
@@ -333,6 +342,8 @@ class InvoiceController extends Controller
                 'message' => "{$typeDocument->name} #{$resolution->next_consecutive} generada con éxito",
                 'filename' => $filename,
                 'invoice' => $invoice,
+                'pathXML' => storage_path("app/public/{$company->identification_number}/{$filename}.xml"),
+                'pathPDF' => storage_path("app/public/{$company->identification_number}/{$invoice[0]->pdf}")
                 /*'send_email_success' => (null !== $invoice && $request->sendmail == true) ?? $invoice[0]->send_email_success == 1,
                 'send_email_date_time' => (null !== $invoice && $request->sendmail == true) ?? Carbon::now()->format('Y-m-d H:i'),
                 //'ResponseDian' => $respuestadian,
