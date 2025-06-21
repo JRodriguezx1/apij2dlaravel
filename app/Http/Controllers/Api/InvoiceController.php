@@ -251,8 +251,10 @@ class InvoiceController extends Controller
         ///////////////////// validar y probar envio de solo email ////////////////////////
         $objtypedocument = new stdClass();
         $objtypedocument->code = 1;
-        $invoice[0] = ['prefix'=>0, 'number'=>0, 'type_document'=>$objtypedocument];
-        Mail::to($customer->email)->send(new InvoiceMail($invoice, $customer, $company, FALSE, FALSE, $filename, TRUE, $request));
+        $filename = "FES-".$sendBillSync->fileName;
+        $invoice = [];
+        $invoice[0] = ['prefix'=>'SETP', 'number'=>994411022, 'pdf'=>"FES-$resolution->next_consecutive.pdf", 'type_document'=>$objtypedocument];
+        //Mail::to($customer->email)->send(new InvoiceMail($invoice, $customer, $company, FALSE, FALSE, $filename, TRUE, $request));
         ////////////////////////////////////////////////////
 
 
@@ -329,6 +331,8 @@ class InvoiceController extends Controller
 
         return [
                 'message' => "{$typeDocument->name} #{$resolution->next_consecutive} generada con éxito",
+                'filename' => $filename,
+                'invoice' => $invoice,
                 /*'send_email_success' => (null !== $invoice && $request->sendmail == true) ?? $invoice[0]->send_email_success == 1,
                 'send_email_date_time' => (null !== $invoice && $request->sendmail == true) ?? Carbon::now()->format('Y-m-d H:i'),
                 //'ResponseDian' => $respuestadian,
@@ -533,7 +537,7 @@ class InvoiceController extends Controller
 
         if ($request->GuardarEn){  
           $sendTestSetAsync->contentFile = $this->zipBase64($company, $resolution, $signInvoice->sign($invoice), $request->GuardarEn."\\FES-{$resolution->next_consecutive}");
-        }else{
+        }else{                                                              // se enia documento firmado y el camino en donde se va aguardar el documento firmado
           $sendTestSetAsync->contentFile = $this->zipBase64($company, $resolution, $signInvoice->sign($invoice), storage_path("app/public/{$company->identification_number}/FES-{$resolution->next_consecutive}"));
         }
         $sendTestSetAsync->testSetId = $testSetId;
