@@ -5,6 +5,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\ConfigurationController;
+use App\Http\Controllers\Api\CreditNoteController;
 use App\Http\Controllers\Api\InvoiceController;
 use App\Http\Controllers\Api\StateController;
 
@@ -42,13 +43,19 @@ Route::middleware('auth.token')->group(function(){
             Route::put('/software', [ConfigurationController::class, 'storeSoftware']);
             Route::put('/certificate', [ConfigurationController::class, 'storeCertificate']);
             Route::put('/resolution', [ConfigurationController::class, 'storeResolution']);
-            Route::put('/environment', [ConfigurationController::class, 'storeSoftware']);
+            Route::put('/environment', [ConfigurationController::class, 'storeEnvironment']);
         });
 
         //Invoice
         Route::prefix('/invoice')->group(function(){
             Route::post('/{testSetId}', [InvoiceController::class, 'testSetStore']);  //enviar una factura en modo habilitacion
             Route::post('/', [InvoiceController::class, 'store']); //enviar una factura electronica
+        });
+
+        //nota credito
+        Route::prefix('/credit-note')->group(function(){
+            Route::post('/{testSetId}', [CreditNoteController::class, 'testSetStore']);  //
+            Route::post('/', [CreditNoteController::class, 'store']); //
         });
 
         //Status

@@ -356,6 +356,7 @@ class ConfigurationController extends Controller
         if(!$request->eqdocs_type_environment_id)
             $request->eqdocs_type_environment_id = auth()->user()->company->eqdocs_type_environment_id;
 
+        //Actualizar COMPAÑIA, campo type_environment_id, .. de la COMPAÑIA 
         auth()->user()->company->update([
             'type_environment_id' => $request->type_environment_id,
             'payroll_type_environment_id' => $request->payroll_type_environment_id,

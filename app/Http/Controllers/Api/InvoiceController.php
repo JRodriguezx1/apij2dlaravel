@@ -247,9 +247,8 @@ class InvoiceController extends Controller
         $ar = new \DOMDocument;
 
 
-
         ///////////////////// validar y probar envio de solo email ////////////////////////
-        $objtype_document = new stdClass();
+        /*$objtype_document = new stdClass();
         $objtype_document->code = 6;
         $objtypedocument = new stdClass();
         $objtypedocument->code = 1;
@@ -259,15 +258,14 @@ class InvoiceController extends Controller
         $objtypedocument->total = 33000;
         $objtypedocument->created_at = $date;
         $objtypedocument->type_document = $objtype_document;
-
         $filename = "FES-".$resolution->next_consecutive;
         $invoice = [];
         $invoice[0] = $objtypedocument;
-        Mail::to($customer->email)->send(new InvoiceMail($invoice, $customer, $company, FALSE, FALSE, $filename, TRUE, $request));
+        Mail::to($customer->email)->send(new InvoiceMail($invoice, $customer, $company, FALSE, FALSE, $filename, TRUE, $request));*/
         ////////////////////////////////////////////////////
 
 
-        /*
+        
         try{
             $respuestadian = $sendBillSync->signToSend(storage_path("app/public/{$company->identification_number}/ReqFE-{$resolution->next_consecutive}.xml"))->getResponseToObject(storage_path("app/public/{$company->identification_number}/RptaFE-{$resolution->next_consecutive}.xml"));
             if(isset($respuestadian->html)){
@@ -316,9 +314,7 @@ class InvoiceController extends Controller
                         if($customer->company->identification_number != '222222222222'){
                             try{
                                 //Enviar email de la factura al cliente consumidor
-                                $objtypedocument = new stdClass();
-                                $objtypedocument->code = 1;
-                                $invoice[0] = ['prefix'=>0, 'number'=>0, 'type_document'=>$objtypedocument];
+                                
                                 Mail::to($customer->email)->send(new InvoiceMail($invoice, $customer, $company, FALSE, FALSE, $filename, TRUE, $request));
                                 //enviar email de la factura a mi o negocio
                                 if($request->sendmailtome)
@@ -336,17 +332,17 @@ class InvoiceController extends Controller
             }
         } catch (\Throwable $th) {
             //throw $th;
-        }*/
+        }
 
         return [
                 'message' => "{$typeDocument->name} #{$resolution->next_consecutive} generada con éxito",
                 'filename' => $filename,
-                'invoice' => $invoice,
-                'pathXML' => storage_path("app/public/{$company->identification_number}/{$filename}.xml"),
-                'pathPDF' => storage_path("app/public/{$company->identification_number}/{$invoice[0]->pdf}")
-                /*'send_email_success' => (null !== $invoice && $request->sendmail == true) ?? $invoice[0]->send_email_success == 1,
+                //'invoice' => $invoice,
+                //'pathXML' => storage_path("app/public/{$company->identification_number}/{$filename}.xml"),
+                //'pathPDF' => storage_path("app/public/{$company->identification_number}/{$invoice[0]->pdf}")
+                'send_email_success' => (null !== $invoice && $request->sendmail == true) ?? $invoice[0]->send_email_success == 1,
                 'send_email_date_time' => (null !== $invoice && $request->sendmail == true) ?? Carbon::now()->format('Y-m-d H:i'),
-                //'ResponseDian' => $respuestadian,
+                'ResponseDian' => $respuestadian,
                 'invoicexml'=>base64_encode(file_get_contents(storage_path("app/public/{$company->identification_number}/FES-{$resolution->next_consecutive}.xml"))),
                 'zipinvoicexml'=>base64_encode(file_get_contents(storage_path("app/public/{$company->identification_number}/FES-{$resolution->next_consecutive}.zip"))),
                 'unsignedinvoicexml'=>base64_encode(file_get_contents(storage_path("app/public/{$company->identification_number}/FE-{$resolution->next_consecutive}.xml"))),
@@ -359,7 +355,7 @@ class InvoiceController extends Controller
                 'cufe' => $signInvoice->ConsultarCUFE(),
                 'QRStr' => $QRStr,
                 'certificate_days_left' => $certificate_days_left,
-                'resolution_days_left' => $this->days_between_dates(Carbon::now()->format('Y-m-d'), $resolution->date_to),*/
+                'resolution_days_left' => $this->days_between_dates(Carbon::now()->format('Y-m-d'), $resolution->date_to),
             ];
 
     }
@@ -521,7 +517,7 @@ class InvoiceController extends Controller
         //json_encode($invoice);
 
 
-        // Signature XML
+        // Signature XML firma del documento
         $signInvoice = new SignInvoice($company->certificate->path, $company->certificate->password);
         $signInvoice->softwareID = $company->software->identifier;
         $signInvoice->pin = $company->software->pin;
@@ -546,7 +542,7 @@ class InvoiceController extends Controller
         $sendTestSetAsync->To = $company->software->url;
         $sendTestSetAsync->fileName = "{$resolution->next_consecutive}.xml";
 
-        if ($request->GuardarEn){  
+        if ($request->GuardarEn){                                                   // firma del envio
           $sendTestSetAsync->contentFile = $this->zipBase64($company, $resolution, $signInvoice->sign($invoice), $request->GuardarEn."\\FES-{$resolution->next_consecutive}");
         }else{                                                              // se enia documento firmado y el camino en donde se va aguardar el documento firmado
           $sendTestSetAsync->contentFile = $this->zipBase64($company, $resolution, $signInvoice->sign($invoice), storage_path("app/public/{$company->identification_number}/FES-{$resolution->next_consecutive}"));
@@ -557,7 +553,7 @@ class InvoiceController extends Controller
             
         return [
                 'message' => "{$typeDocument->name} #{$resolution->next_consecutive} generada con éxito",
-                /*'ResponseDian' => $sendTestSetAsync->signToSend(storage_path("app/public/{$company->identification_number}/ReqFE-{$resolution->next_consecutive}.xml"))->getResponseToObject(storage_path("app/public/{$company->identification_number}/RptaFE-{$resolution->next_consecutive}.xml")), //enviar documento firmado y obtener su respuesta.
+                'ResponseDian' => $sendTestSetAsync->signToSend(storage_path("app/public/{$company->identification_number}/ReqFE-{$resolution->next_consecutive}.xml"))->getResponseToObject(storage_path("app/public/{$company->identification_number}/RptaFE-{$resolution->next_consecutive}.xml")), //enviar documento firmado y obtener su respuesta.
                 'invoicexml'=>base64_encode(file_get_contents(storage_path("app/public/{$company->identification_number}/FES-{$resolution->next_consecutive}.xml"))), //obtener en memoria el documento firmado digitalmente .xml
                 'zipinvoicexml'=>base64_encode(file_get_contents(storage_path("app/public/{$company->identification_number}/FES-{$resolution->next_consecutive}.zip"))), //obtener en memoria el ZIP del documento firmado digitalmente
                 'unsignedinvoicexml'=>base64_encode(file_get_contents(storage_path("app/public/{$company->identification_number}/FE-{$resolution->next_consecutive}.xml"))), //obtener en memoria el documento sin firmar .xml
@@ -567,12 +563,12 @@ class InvoiceController extends Controller
                 'urlinvoicepdf'=>"FES-{$resolution->next_consecutive}.pdf",
                 'urlinvoiceattached'=>"Attachment-{$resolution->next_consecutive}.xml",
                 'cufe' => $signInvoice->ConsultarCUFE(),
-                //'QRStr' => $QRStr,
+                'QRStr' => $QRStr,
                 'certificate_days_left' => $certificate_days_left,
-                'resolution_days_left' => $this->days_between_dates(Carbon::now()->format('Y-m-d'), $resolution->date_to),*/
+                'resolution_days_left' => $this->days_between_dates(Carbon::now()->format('Y-m-d'), $resolution->date_to),
             ];
         
-    }
+    } //fin testSetStore invoice
 
     /**
      * Show the form for editing the specified resource.
