@@ -505,7 +505,6 @@ class InvoiceController extends Controller
         $legalMonetaryTotals = new LegalMonetaryTotal($request->legal_monetary_totals);
 
         // Invoice lines
-
         $invoiceLines = collect();
         foreach ($request->invoice_lines as $invoiceLine) {
             $invoiceLines->push(new InvoiceLine($invoiceLine));
