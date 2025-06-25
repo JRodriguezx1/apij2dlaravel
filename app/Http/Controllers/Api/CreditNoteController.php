@@ -22,6 +22,8 @@ use App\Models\InvoiceLine as CreditNoteLine;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use App\Traits\DocumentTrait;
+use ubl21dian\Templates\SOAP\SendTestSetAsync;
+use ubl21dian\XAdES\SignCreditNote;
 
 class CreditNoteController extends Controller
 {
@@ -119,7 +121,7 @@ class CreditNoteController extends Controller
         else
             $healthfields = NULL;
 
-        // Discrepancy response
+        // Discrepancy response - MOTIVO DE LA NOTA
         $discrepancycode = $request->discrepancyresponsecode;
         $discrepancydescription = $request->discrepancyresponsedescription;    
 
@@ -166,7 +168,7 @@ class CreditNoteController extends Controller
         // Billing reference
         if(!$request->billing_reference)
             $billingReference = NULL;
-        else{
+        else{  //REFERENCIA A LA FACTURA ORIGINAL Incluye: (Número de factura original, Fecha, CUFE de la factura que se va a anular)
             $billingReference = new BillingReference($request->billing_reference);
             if($is_eqdoc){
                 $billingReference->setSchemeNameAttribute("CUDE-SHA384");
@@ -177,8 +179,52 @@ class CreditNoteController extends Controller
         // Create XML
         if(isset($request->is_RNDC) && $request->is_RNDC == TRUE)
             $request->isTransport = TRUE;
-        $crediNote = $this->createXML([]);
+        $crediNote = $this->createXML(compact('user', 'company', 'customer', 'taxTotals', 'withHoldingTaxTotal', 'resolution', 'paymentForm', 'typeDocument', 'creditNoteLines', 'allowanceCharges', 'legalMonetaryTotals', 'billingReference', 'date', 'time', 'notes', 'typeoperation', 'orderreference', 'discrepancycode', 'discrepancydescription', 'request', 'idcurrency', 'calculationrate', 'calculationratedate', 'healthfields'));
         
+        // Signature XML
+        $signCreditNote = new SignCreditNote($company->certificate->path, $company->certificate->password);
+        if($is_eqdoc){
+            $signCreditNote->softwareID = $company->software->identifier_eqdocs;
+            $signCreditNote->pin = $company->software->pin_eqdocs;
+        }
+        else{
+            $signCreditNote->softwareID = $company->software->identifier;
+            $signCreditNote->pin = $company->software->pin;
+        }
+         
+        //Crear direccion para guardar el archivo xml
+        if ($request->GuardarEn){
+            if (!is_dir($request->GuardarEn)) {
+                mkdir($request->GuardarEn);
+            }
+            $signCreditNote->GuardarEn = $request->GuardarEn."\\FE-{$resolution->next_consecutive}.xml";
+        }
+        else{
+            if (!is_dir(storage_path("app/public/{$company->identification_number}"))) {
+                mkdir(storage_path("app/public/{$company->identification_number}"));
+            }
+            $signCreditNote->GuardarEn = storage_path("app/public/{$company->identification_number}/FE-{$resolution->next_consecutive}.xml");  //direccion local para guardar el archivo xml signInvoice->GuardarEn = app/public/1094955142/FE-SETUP994411000.xml
+        }
+
+        $sendTestSetAsync = new SendTestSetAsync($company->certificate->path, $company->certificate->password);
+        if($is_eqdoc) //si es documento equivalente
+            $sendTestSetAsync->To = $company->software->url_eqdocs;
+        else
+            $sendTestSetAsync->To = $company->software->url;
+
+        $sendTestSetAsync->fileName = "{$resolution->next_consecutive}.xml";
         
+        if ($request->GuardarEn){
+            $sendTestSetAsync->contentFile = $this->zipBase64($company, $resolution, $signCreditNote->sign($crediNote), $request->GuardarEn."\\{$pfs}-{$resolution->next_consecutive}");
+        }else{
+            $sendTestSetAsync->contentFile = $this->zipBase64($company, $resolution, $signCreditNote->sign($crediNote), storage_path("app/public/{$company->identification_number}/{$pfs}-{$resolution->next_consecutive}"));
+        }
+        $sendTestSetAsync->testSetId = $testSetId;
+
+        $QRStr = $this->createPDF($user, $company, $customer, $typeDocument, $resolution, $date, $time, $paymentForm, $request, $signCreditNote->ConsultarCUDE(), "NC", $withHoldingTaxTotal, $notes, $healthfields);
+
+        return [
+            'mensaje'=>'Nota credito realizada con exito',
+        ];
     }
 }
