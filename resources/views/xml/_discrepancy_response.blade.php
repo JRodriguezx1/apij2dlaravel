@@ -5,9 +5,9 @@
     <cbc:ResponseCode>{{preg_replace("/[\r\n|\n|\r]+/", "", $discrepancycode)}}</cbc:ResponseCode>
     @isset($discrepancycode)
         @if($request['type_document_id'] == 4 || $request['type_document_id'] == 26)
-            @inject('Discrepancy', 'App\CreditNoteDiscrepancyResponse')
+            @inject('Discrepancy', 'App\Models\CreditNoteDiscrepancyResponse')
         @else
-            @inject('Discrepancy', 'App\DebitNoteDiscrepancyResponse')
+            @inject('Discrepancy', 'App\Models\DebitNoteDiscrepancyResponse')
         @endif
         <cbc:Description>{{$Discrepancy->findOrFail($discrepancycode)['name']}}</cbc:Description>
     @endisset
