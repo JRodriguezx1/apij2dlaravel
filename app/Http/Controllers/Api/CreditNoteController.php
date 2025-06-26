@@ -181,6 +181,7 @@ class CreditNoteController extends Controller
         if(isset($request->is_RNDC) && $request->is_RNDC == TRUE)
             $request->isTransport = TRUE;
         $crediNote = $this->createXML(compact('user', 'company', 'customer', 'taxTotals', 'withHoldingTaxTotal', 'resolution', 'paymentForm', 'typeDocument', 'creditNoteLines', 'allowanceCharges', 'legalMonetaryTotals', 'billingReference', 'date', 'time', 'notes', 'typeoperation', 'orderreference', 'discrepancycode', 'discrepancydescription', 'request', 'idcurrency', 'calculationrate', 'calculationratedate', 'healthfields'));
+        //$crediNote->saveXML();
         
         // Signature XML
         $signCreditNote = new SignCreditNote($company->certificate->path, $company->certificate->password);
@@ -192,7 +193,7 @@ class CreditNoteController extends Controller
             $signCreditNote->softwareID = $company->software->identifier;
             $signCreditNote->pin = $company->software->pin;
         }
-         /*
+         
         //Crear direccion para guardar el archivo xml
         if ($request->GuardarEn){
             if (!is_dir($request->GuardarEn)) {
