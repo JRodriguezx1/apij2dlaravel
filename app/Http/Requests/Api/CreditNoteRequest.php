@@ -129,6 +129,14 @@ class CreditNoteRequest extends FormRequest
             // Discrepancy Response
             'discrepancyresponsecode' => 'nullable|integer|between:1,6',
             'discrepancyresponsedescription' => 'nullable|string',
+            /*
+            1	Devolución parcial de los bienes y/o no aceptación parcial del servicio 
+            2	Anulación de factura electrónica 
+            3	Rebaja  o descuento parcial o total 
+            4	Ajuste de precio 
+            5	Descuento comercial por pronto pago
+            6	Descuento comercial por volumen de venta
+            */
 
             // Billing Reference
             'billing_reference' => 'nullable|array',
