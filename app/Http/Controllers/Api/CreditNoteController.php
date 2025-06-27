@@ -208,7 +208,7 @@ class CreditNoteController extends Controller
             $signCreditNote->GuardarEn = storage_path("app/public/{$company->identification_number}/FE-{$resolution->next_consecutive}.xml");  //direccion local para guardar el archivo xml signInvoice->GuardarEn = app/public/1094955142/FE-SETUP994411000.xml
         }
 
-        /*
+        
         $sendTestSetAsync = new SendTestSetAsync($company->certificate->path, $company->certificate->password);
         if($is_eqdoc) //si es documento equivalente
             $sendTestSetAsync->To = $company->software->url_eqdocs;
@@ -223,12 +223,13 @@ class CreditNoteController extends Controller
             $sendTestSetAsync->contentFile = $this->zipBase64($company, $resolution, $signCreditNote->sign($crediNote), storage_path("app/public/{$company->identification_number}/{$pfs}-{$resolution->next_consecutive}"));
         }
         $sendTestSetAsync->testSetId = $testSetId;
-        */
+        
 
-        //$QRStr = $this->createPDF($user, $company, $customer, $typeDocument, $resolution, $date, $time, $paymentForm, $request, $signCreditNote->ConsultarCUDE(), "NC", $withHoldingTaxTotal, $notes, $healthfields);
+        $QRStr = $this->createPDF($user, $company, $customer, $typeDocument, $resolution, $date, $time, $paymentForm, $request, $signCreditNote->ConsultarCUDE(), "NC", $withHoldingTaxTotal, $notes, $healthfields);
 
         return [
             'mensaje'=>'Nota credito realizada con exito',
+            'xml'=>$crediNote->saveXML()
         ];
     }
 }

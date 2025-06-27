@@ -1,4 +1,4 @@
-<table style="width: 100%">
+<table style="width: 100%;">
     <tbody>
         <tr>
             <td style="width: 30%; text-align: center;">
@@ -13,8 +13,7 @@
                     font-size: 11px;
                     text-align: center;
                     padding: 5px;">Fecha Emision: {{$date}}</p><br>
-                <p style="font-size: 8px;">Fecha Validación DIAN: {{$date}}<br>
-                    Hora Validación DIAN: {{$time}}</p>
+                <p style="font-size: 8px;">Fecha Validación DIAN: {{$date}}<br>Hora Validación DIAN: {{$time}}</p>
             </td>
             <td style="width: 40%; text-align: center; padding: 0 10px;">
                 <div id="empresa-header">
@@ -60,7 +59,7 @@
                     @else
                         {{$company->address}} -
                     @endif
-                    @inject('municipality', 'App\Municipality')
+                    @inject('municipality', 'App\Models\Municipality')
                     @if(isset($request->establishment_municipality))
                         {{$municipality->findOrFail($request->establishment_municipality)['name']}} - {{$municipality->findOrFail($request->establishment_municipality)['department']['name']}} -
                     @else

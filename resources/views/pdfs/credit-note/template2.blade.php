@@ -8,16 +8,13 @@
 
 <body margin-top:50px>
     @if(isset($request->head_note))
-    <div class="row">
-        <div class="col-sm-12">
-            <table class="table table-bordered table-condensed table-striped table-responsive">
-                <thead>
-                    <tr>
-                        <th class="text-center"><p><strong>{{$request->head_note}}<br/>
-                    </tr>
-                </thead>
-            </table>
-        </div>
+    <div>
+        <br>
+        <table class="table table-bordered table-condensed table-striped table-responsive" style="margin-top: 10px;">
+            <thead>
+                <tr><th class="text-center" style="font-size: 10px;">{{$request->head_note}}</th></tr>
+            </thead>
+        </table>
     </div>
     @endif
     <table style="width: 100%;">
@@ -186,7 +183,7 @@
             @foreach($request['credit_note_lines'] as $item)
                 <?php $ItemNro = $ItemNro + 1; ?>
                 <tr>
-                    @inject('um', 'App\UnitMeasure')
+                    @inject('um', 'App\Models\UnitMeasure')
                     <td>{{$ItemNro}}</td>
                     <td>{{$item['code']}}</td>
                     <td>
@@ -282,7 +279,7 @@
                                 @foreach($request->tax_totals as $item)
                                     <tr>
                                         <?php $TotalImpuestos = $TotalImpuestos + $item['tax_amount'] ?>
-                                        @inject('tax', 'App\Tax')
+                                        @inject('tax', 'App\Models\Tax')
                                         <td>{{$tax->findOrFail($item['tax_id'])['name']}}</td>
                                         <td class="text-right">{{number_format($item['taxable_amount'], 2)}}</td>
                                         <td class="text-right">{{number_format($item['percent'], 2)}}%</td>
@@ -311,7 +308,7 @@
                                 @foreach($withHoldingTaxTotal as $item)
                                     <tr>
                                         <?php $TotalRetenciones = $TotalRetenciones + $item['tax_amount'] ?>
-                                        @inject('tax', 'App\Tax')
+                                        @inject('tax', 'App\Models\Tax')
                                         <td>{{$tax->findOrFail($item['tax_id'])['name']}}</td>
                                         <td class="text-right">{{number_format($item['taxable_amount'], 2)}}</td>
                                         <td class="text-right">{{number_format($item['percent'], 2)}}%</td>
