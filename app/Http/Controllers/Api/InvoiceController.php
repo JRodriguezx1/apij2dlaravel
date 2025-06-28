@@ -126,7 +126,7 @@ class InvoiceController extends Controller
         }
 
         // Resolution
-        $request->resolution->number = $request->number;
+        $request->resolution->number = $request->number; //establece en el campo virtual number por medio de setNumberAttribute el valor, por el model Resolution.
         $resolution = $request->resolution;
 
         //validar documento antes de enviar
@@ -222,7 +222,7 @@ class InvoiceController extends Controller
             if (!is_dir($request->GuardarEn)) {
                 mkdir($request->GuardarEn);
             }
-            $signInvoice->GuardarEn = $request->GuardarEn."\\FE-{$resolution->next_consecutive}.xml";
+            $signInvoice->GuardarEn = $request->GuardarEn."\\FE-{$resolution->next_consecutive}.xml"; //obtiene el valor del campo virtual next_consecutive por medio de getNextConsecutiveAttribute
         }
         else{
             if (!is_dir(storage_path("app/public/{$company->identification_number}"))) {

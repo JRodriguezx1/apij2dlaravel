@@ -29,7 +29,48 @@ use ubl21dian\XAdES\SignCreditNote;
 class CreditNoteController extends Controller
 {
     use DocumentTrait;
-    //
+    
+    public function store(CreditNoteRequest $request, $testSetId)
+    {
+        //obtener usuario
+        $user = auth()->user();
+        //obtener compañia
+        $company = $user->company;
+        //Verifica certificado
+        $certificate_days_left = 0;
+        $c = $this->verify_certificate();
+        if(!$c['success']){
+            return $c;
+        }else{
+            $certificate_days_left = $c['certificate_days_left'];
+        }
+
+        // Type document
+        $typeDocument = TypeDocument::findOrFail($request->type_document_id); //si es factura electronica de venta, si es factura de exportacion, si es factura de contigencia, nota credito etc.
+        //si es documento equivalente $request->is_eqdoc = true
+        if($request->is_eqdoc){
+            $is_eqdoc = true;
+            $pf = strtoupper($typeDocument->prefix);
+            $pfs = strtoupper($typeDocument->prefix)."S";
+        }
+        else{
+            $is_eqdoc = false;
+            $pf = "NC";
+            $pfs = "NCS";
+        }
+        
+        //Customer
+        $customerAll = collect($request->customer);
+        if(isset($customerAll['municipality_id_fact']))
+            $customerAll['municipality_id'] = Municipality::where('codefacturador', $customerAll['municipality_id_fact'])->first();
+        $customer = new User($customerAll->toArray());
+        
+        // Customer company
+        $customer->company = new Company($customerAll->toArray());
+
+        
+
+    }
     public function testSetStore(CreditNoteRequest $request, $testSetId)
     {
         //obtener usuario
@@ -86,7 +127,7 @@ class CreditNoteController extends Controller
         }
 
         // Resolution
-        $request->resolution->number = $request->number;
+        $request->resolution->number = $request->number;  //establece valor en el campo virtual number por medio de setNumberAttribute, por el model Resolution.
         $resolution = $request->resolution;
     
         //validar documento antes de enviar
@@ -199,13 +240,13 @@ class CreditNoteController extends Controller
             if (!is_dir($request->GuardarEn)) {
                 mkdir($request->GuardarEn);
             }
-            $signCreditNote->GuardarEn = $request->GuardarEn."\\FE-{$resolution->next_consecutive}.xml";
+            $signCreditNote->GuardarEn = $request->GuardarEn."\\{$pf}-{$resolution->next_consecutive}.xml"; //obtiene el valor del campo virtual next_consecutive por medio de getNextConsecutiveAttribute.
         }
         else{
             if (!is_dir(storage_path("app/public/{$company->identification_number}"))) {
                 mkdir(storage_path("app/public/{$company->identification_number}"));
             }
-            $signCreditNote->GuardarEn = storage_path("app/public/{$company->identification_number}/FE-{$resolution->next_consecutive}.xml");  //direccion local para guardar el archivo xml signInvoice->GuardarEn = app/public/1094955142/FE-SETUP994411000.xml
+            $signCreditNote->GuardarEn = storage_path("app/public/{$company->identification_number}/{$pf}-{$resolution->next_consecutive}.xml");  //direccion local para guardar el archivo xml signInvoice->GuardarEn = app/public/1094955142/FE-SETUP994411000.xml
         }
 
         
@@ -227,9 +268,21 @@ class CreditNoteController extends Controller
 
         $QRStr = $this->createPDF($user, $company, $customer, $typeDocument, $resolution, $date, $time, $paymentForm, $request, $signCreditNote->ConsultarCUDE(), "NC", $withHoldingTaxTotal, $notes, $healthfields);
 
+
         return [
-            'mensaje'=>'Nota credito realizada con exito',
-            'xml'=>$crediNote->saveXML()
+            'message' => "{$typeDocument->name} #{$resolution->next_consecutive} generada con éxito",
+            'ResponseDian' => $sendTestSetAsync->signToSend(storage_path("app/public/{$company->identification_number}/Req{$pf}-{$resolution->next_consecutive}.xml"))->getResponseToObject(storage_path("app/public/{$company->identification_number}/Rpta{$pf}-{$resolution->next_consecutive}.xml")),
+            'invoicexml'=>base64_encode(file_get_contents(storage_path("app/public/{$company->identification_number}/{$pfs}-{$resolution->next_consecutive}.xml"))),
+            'zipinvoicexml'=>base64_encode(file_get_contents(storage_path("app/public/{$company->identification_number}/{$pfs}-{$resolution->next_consecutive}.zip"))),
+            'unsignedinvoicexml'=>base64_encode(file_get_contents(storage_path("app/public/{$company->identification_number}/{$pf}-{$resolution->next_consecutive}.xml"))),
+            'reqfe'=>base64_encode(file_get_contents(storage_path("app/public/{$company->identification_number}/Req{$pf}-{$resolution->next_consecutive}.xml"))),
+            'rptafe'=>base64_encode(file_get_contents(storage_path("app/public/{$company->identification_number}/Rpta{$pf}-{$resolution->next_consecutive}.xml"))),
+            'urlinvoicexml'=>"{$pfs}-{$resolution->next_consecutive}.xml",
+            'urlinvoicepdf'=>"{$pfs}-{$resolution->next_consecutive}.pdf",
+            'urlinvoiceattached'=>"Attachment-{$resolution->next_consecutive}.xml",
+            'cude' => $signCreditNote->ConsultarCUDE(),
+            'QRStr' => $QRStr,
+            'certificate_days_left' => $certificate_days_left,
         ];
     }
 }
