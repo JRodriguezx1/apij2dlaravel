@@ -53,29 +53,29 @@ class InvoiceRequest extends FormRequest
             'email_cc_list.*.email' => 'nullable|required_with:email_cc_list,|string|email',
 
             // Documentos en base64 para adjuntar en el attacheddocument
-            'annexes' => 'nullable|array',
-            'annexes.*.document' => 'nullable|required_with:annexes|string',
-            'annexes.*.extension' => 'nullable|required_with:annexes|string',
+            //'annexes' => 'nullable|array',
+            //'annexes.*.document' => 'nullable|required_with:annexes|string',
+            //'annexes.*.extension' => 'nullable|required_with:annexes|string',
 
             // HTML string body email
-            'html_header' => 'nullable|string',
-            'html_body' => 'nullable|string',
-            'html_buttons' => 'nullable|string',
-            'html_footer' => 'nullable|string',
+            //'html_header' => 'nullable|string',
+            //'html_body' => 'nullable|string',
+            //'html_buttons' => 'nullable|string',
+            //'html_footer' => 'nullable|string',
 
             // Invoice template name
-            'invoice_template' => 'nullable|string',
+            //'invoice_template' => 'nullable|string',
 
             // Dynamic field
-            'dynamic_field' => 'nullable|array',
-            'dynamic_field.name' => 'nullable|required_with:dynamic_field|string',
-            'dynamic_field.value' => 'nullable|required_with:dynamic_field|string',
-            'dynamic_field.add_to_total' => 'nullable|required_with:dynamic_field|boolean',
+            //'dynamic_field' => 'nullable|array',
+            //'dynamic_field.name' => 'nullable|required_with:dynamic_field|string',
+            //'dynamic_field.value' => 'nullable|required_with:dynamic_field|string',
+            //'dynamic_field.add_to_total' => 'nullable|required_with:dynamic_field|boolean',
 
             // Other fields for templates
-            'sales_assistant' => 'nullable|string',
-            'web_site' => 'nullable|string',
-            'template_token' => 'nullable|required_with:invoice_template|string',
+            //'sales_assistant' => 'nullable|string',
+            //'web_site' => 'nullable|string',
+            //'template_token' => 'nullable|required_with:invoice_template|string',
 
             // Prefijo del Nombre del AttachedDocument
             'atacheddocument_name_prefix' => 'nullable|string',
@@ -88,12 +88,12 @@ class InvoiceRequest extends FormRequest
             'head_note' => 'nullable|string',
 
             // Desactivar texto de confirmacion de pago
-            'disable_confirmation_text' => 'nullable|boolean',
+            //'disable_confirmation_text' => 'nullable|boolean',
 
             // Enviar Correo al Adquiriente
             'sendmail' => 'nullable|boolean',
             'sendmailtome' => 'nullable|boolean',
-            'send_customer_credentials' => 'nullable|boolean',
+            //'send_customer_credentials' => 'nullable|boolean',
 
             // Nombre Archivo
             'GuardarEn' => 'nullable|string',
@@ -117,8 +117,8 @@ class InvoiceRequest extends FormRequest
             'notes' => 'nullable|string',
 
             //Elaborado y Revisado
-            'elaborated' => 'nullable|string',
-            'reviewed' => 'nullable|string',
+            //'elaborated' => 'nullable|string',
+            //'reviewed' => 'nullable|string',
 
             // Tipo operacion
             'type_operation_id' => 'nullable|numeric|exists:type_operations',

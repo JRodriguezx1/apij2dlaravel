@@ -39,27 +39,7 @@ use ubl21dian\Templates\SOAP\SendTestSetAsync;
 class InvoiceController extends Controller
 {
     use DocumentTrait;
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
-    {
-        //
-        return "hola index";
-        
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
+    
     public function store(InvoiceRequest $request)
     {
         //
@@ -362,9 +342,6 @@ class InvoiceController extends Controller
 
 
 
-    /**
-     * Display the specified resource.
-     */
     public function testSetStore(InvoiceRequest $request, $testSetId)
     {
         //obtener usuario
