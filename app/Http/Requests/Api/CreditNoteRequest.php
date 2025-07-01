@@ -122,7 +122,7 @@ class CreditNoteRequest extends FormRequest
             }),*/
 
 
-            // Consecutive
+            // Consecutivo de la NC
             //'number' => 'required|integer|between:'.optional($this->resolution)->from.','.optional($this->resolution)->to,
             'number' => ['required', 'integer', 'between:' . optional($this->resolution)->from . ',' . optional($this->resolution)->to,],
 
@@ -165,11 +165,11 @@ class CreditNoteRequest extends FormRequest
             'customer.type_liability_id' => 'nullable|exists:type_liabilities,id',
             'customer.name' => 'required|string',
             'customer.phone' => 'nullable|string|max:20',
-//            'customer.phone' => 'required_unless:customer.identification_number,222222222222|string|max:20',
+            //'customer.phone' => 'required_unless:customer.identification_number,222222222222|string|max:20',
             'customer.address' => 'nullable|string',
-//            'customer.address' => 'required_unless:customer.identification_number,222222222222|string',
+            //'customer.address' => 'required_unless:customer.identification_number,222222222222|string',
             'customer.email' => 'required_unless:customer.identification_number,222222222222|string|email',
-//            'customer.merchant_registration' => 'required|string',
+            //'customer.merchant_registration' => 'required|string',
             'customer.merchant_registration' => 'nullable|string',
 
             // SMTP Server Parameters

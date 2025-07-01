@@ -98,7 +98,7 @@
             </cac:CorporateRegistrationScheme>
         </cac:PartyLegalEntity>
         <cac:Contact>
-            @if($user->company->identification_number != "222222222222")
+            @if($user->company->identification_number != "222222222222" || $user->company->identification_number == "222222222222")
                 <cbc:Telephone>{{preg_replace("/[\r\n|\n|\r]+/", "", $user->company->phone)}}</cbc:Telephone>
                 <cbc:ElectronicMail>{{preg_replace("/[\r\n|\n|\r]+/", "", $user->email)}}</cbc:ElectronicMail>
             @endif

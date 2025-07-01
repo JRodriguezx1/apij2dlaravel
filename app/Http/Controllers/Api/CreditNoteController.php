@@ -19,6 +19,7 @@ use App\Models\TypeDocument;
 use App\Models\TypeOperation;
 use App\Models\User;
 use App\Models\Document;
+use App\Models\InvoicePeriod;
 use App\Models\InvoiceLine as CreditNoteLine;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
@@ -32,7 +33,7 @@ class CreditNoteController extends Controller
 {
     use DocumentTrait;
     
-    public function store(CreditNoteRequest $request, $testSetId)
+    public function store(CreditNoteRequest $request)
     {
         //obtener usuario
         $user = auth()->user();
@@ -118,6 +119,12 @@ class CreditNoteController extends Controller
         else
             $orderreference = NULL;
 
+        // Invoice Period
+        if($request->invoice_period)
+            $invoice_period = new InvoicePeriod($request->invoice_period);
+        else
+            $invoice_period = NULL;
+
        // Health Fields
         if($request->health_fields)
             $healthfields = new HealthField($request->health_fields);
@@ -182,7 +189,7 @@ class CreditNoteController extends Controller
         // Create XML
         if(isset($request->is_RNDC) && $request->is_RNDC == TRUE)
             $request->isTransport = TRUE;
-        $crediNote = $this->createXML(compact('user', 'company', 'customer', 'taxTotals', 'withHoldingTaxTotal', 'resolution', 'paymentForm', 'typeDocument', 'creditNoteLines', 'allowanceCharges', 'legalMonetaryTotals', 'billingReference', 'date', 'time', 'notes', 'typeoperation', 'orderreference', 'discrepancycode', 'discrepancydescription', 'request', 'idcurrency', 'calculationrate', 'calculationratedate', 'healthfields'));
+        $crediNote = $this->createXML(compact('user', 'company', 'customer', 'taxTotals', 'withHoldingTaxTotal', 'resolution', 'paymentForm', 'typeDocument', 'creditNoteLines', 'allowanceCharges', 'legalMonetaryTotals', 'billingReference', 'date', 'time', 'notes', 'typeoperation', 'orderreference', 'discrepancycode', 'discrepancydescription', 'request', 'idcurrency', 'calculationrate', 'calculationratedate', 'healthfields', 'invoice_period'));
         //$crediNote->saveXML();
 
         // Signature XML
@@ -298,7 +305,7 @@ class CreditNoteController extends Controller
         } catch (\Throwable $th) {
             //throw $th;
         }
-
+        $invoice = null;
         return [
                 'message' => "{$typeDocument->name} #{$resolution->next_consecutive} generada con éxito",
                 'send_email_success' => (null !== $invoice && $request->sendmail == true) ?? $invoice[0]->send_email_success == 1,
@@ -407,6 +414,12 @@ class CreditNoteController extends Controller
         else
             $orderreference = NULL;
 
+        // Invoice Period
+        if($request->invoice_period)
+            $invoice_period = new InvoicePeriod($request->invoice_period);
+        else
+            $invoice_period = NULL;
+        
        // Health Fields
         if($request->health_fields)
             $healthfields = new HealthField($request->health_fields);
@@ -471,7 +484,7 @@ class CreditNoteController extends Controller
         // Create XML
         if(isset($request->is_RNDC) && $request->is_RNDC == TRUE)
             $request->isTransport = TRUE;
-        $crediNote = $this->createXML(compact('user', 'company', 'customer', 'taxTotals', 'withHoldingTaxTotal', 'resolution', 'paymentForm', 'typeDocument', 'creditNoteLines', 'allowanceCharges', 'legalMonetaryTotals', 'billingReference', 'date', 'time', 'notes', 'typeoperation', 'orderreference', 'discrepancycode', 'discrepancydescription', 'request', 'idcurrency', 'calculationrate', 'calculationratedate', 'healthfields'));
+        $crediNote = $this->createXML(compact('user', 'company', 'customer', 'taxTotals', 'withHoldingTaxTotal', 'resolution', 'paymentForm', 'typeDocument', 'creditNoteLines', 'allowanceCharges', 'legalMonetaryTotals', 'billingReference', 'date', 'time', 'notes', 'typeoperation', 'orderreference', 'discrepancycode', 'discrepancydescription', 'request', 'idcurrency', 'calculationrate', 'calculationratedate', 'healthfields', 'invoice_period'));
         //$crediNote->saveXML();
         
         // Signature XML
