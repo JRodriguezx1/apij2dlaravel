@@ -329,7 +329,7 @@ class ConfigurationController extends Controller
                 'prefix' => $request->prefix,
             ], [
                 'resolution_date' => $request->resolution_date,
-                'technical_key' => $request->technical_key,
+                'technical_key' => $request->technical_key,  //verificar si se puede obtener con numbering-range
                 'from' => $request->from,
                 'to' => $request->to,
                 'date_from' => $request->date_from,

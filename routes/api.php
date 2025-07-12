@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\ConfigurationController;
 use App\Http\Controllers\Api\CreditNoteController;
 use App\Http\Controllers\Api\InvoiceController;
 use App\Http\Controllers\Api\StateController;
+use App\Http\Controllers\Api\SupportDocumentController;
 
 /*
 |--------------------------------------------------------------------------
@@ -56,6 +57,11 @@ Route::middleware('auth.token')->group(function(){
         Route::prefix('/credit-note')->group(function(){
             Route::post('/{testSetId}', [CreditNoteController::class, 'testSetStore']);  //
             Route::post('/', [CreditNoteController::class, 'store']); //
+        });
+
+        Route::prefix('/support-document')->group(function(){
+            Route::post('/{testSetId}', [SupportDocumentController::class, 'testSetStore']);  //enviar un documento soporte en modo habilitacion
+            Route::post('/', [SupportDocumentController::class, 'store']); //enviar un documento soporte
         });
 
         //Status
