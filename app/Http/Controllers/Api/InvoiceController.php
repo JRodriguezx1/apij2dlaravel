@@ -406,8 +406,8 @@ class InvoiceController extends Controller
         }
 
         // Resolution
-        $request->resolution->number = $request->number;
-        $resolution = $request->resolution;
+        $request->resolution->number = $request->number; //numero o consecutivo
+        $resolution = $request->resolution;  //
 
         //validar documento antes de enviar
         /*

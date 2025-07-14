@@ -4,7 +4,7 @@ namespace App\Http\Requests\Api;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class InvoiceRequest extends FormRequest
+class SupportDocumentRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -23,15 +23,14 @@ class InvoiceRequest extends FormRequest
     {
         //PREPROCESAMIENTO ANTES DE LAS REGLAS.
         //(buscar la resolución específica que coincida con las tres condiciones cuando las tres están disponibles.) las 3 se enviaran obligatorias
-         // Obtener todas las resoluciones de la compañía una sola vez
+        // Obtener todas las resoluciones de la compañía una sola vez
         $resolutions = auth()->user()->company->resolutions;
 
         // Buscar directamente la resolución que coincide con los tres valores
         $this->resolution = $resolutions->firstWhere(function ($res) {
             return $res->type_document_id == $this->type_document_id && $res->resolution == $this->resolution_number && $res->prefix == $this->prefix;
-        });                                          // $res->resolution es numero de resolucion
-        
-        
+        });
+
         return [
             //
             // Adicionales Facturador
@@ -63,20 +62,6 @@ class InvoiceRequest extends FormRequest
             //'html_buttons' => 'nullable|string',
             //'html_footer' => 'nullable|string',
 
-            // Invoice template name
-            //'invoice_template' => 'nullable|string',
-
-            // Dynamic field
-            //'dynamic_field' => 'nullable|array',
-            //'dynamic_field.name' => 'nullable|required_with:dynamic_field|string',
-            //'dynamic_field.value' => 'nullable|required_with:dynamic_field|string',
-            //'dynamic_field.add_to_total' => 'nullable|required_with:dynamic_field|boolean',
-
-            // Other fields for templates
-            //'sales_assistant' => 'nullable|string',
-            //'web_site' => 'nullable|string',
-            //'template_token' => 'nullable|required_with:invoice_template|string',
-
             // Prefijo del Nombre del AttachedDocument
             'atacheddocument_name_prefix' => 'nullable|string',
 
@@ -106,7 +91,7 @@ class InvoiceRequest extends FormRequest
                 //new ResolutionSetting(),
             ],
 
-             // Consecutivo
+            // Consecutivo
             'number' => ['required', 'integer', 'between:' . optional($this->resolution)->from . ',' . optional($this->resolution)->to,],
 
             // Date time
@@ -116,10 +101,6 @@ class InvoiceRequest extends FormRequest
             // Notes
             'notes' => 'nullable|string',
 
-            //Elaborado y Revisado
-            //'elaborated' => 'nullable|string',
-            //'reviewed' => 'nullable|string',
-
             // Tipo operacion
             'type_operation_id' => 'nullable|numeric|exists:type_operations',
 
@@ -128,26 +109,27 @@ class InvoiceRequest extends FormRequest
             'calculationrate' => 'nullable|required_with:idcurrency|numeric',
             'calculationratedate' => 'nullable|required_with:idcurrency|date_format:Y-m-d',
 
-            // Customer
-            'customer' => 'required|array',
-            'customer.identification_number' => 'required|alpha_num|between:1,15',
-            'customer.dv' => 'nullable|numeric|digits:1|dian_dv:'.$this->customer["identification_number"],
-            'customer.type_document_identification_id' => 'nullable|exists:type_document_identifications,id',
-            'customer.type_organization_id' => 'nullable|exists:type_organizations,id',
-            'customer.language_id' => 'nullable|exists:languages,id',
-            'customer.country_id' => 'nullable|exists:countries,id',
-            'customer.municipality_id' => 'nullable|exists:municipalities,id',
-            'customer.municipality_id_fact' => 'nullable|exists:municipalities,codefacturador',
-            'customer.type_regime_id' => 'nullable|exists:type_regimes,id',
-            'customer.tax_id' => 'nullable|exists:taxes,id',
-            'customer.type_liability_id' => 'nullable|exists:type_liabilities,id',
-            'customer.name' => 'required|string',
-            'customer.phone' => 'nullable|string|max:20',
-            'customer.address' => 'nullable|string',
-            'customer.email' => 'required_unless:customer.identification_number,222222222222|string|email',
-            'customer.merchant_registration' => 'nullable|string',
-
-            // SMTP Server Parameters
+            // Seller
+            'seller' => 'required|array',
+            'seller.identification_number' => 'required|alpha_num|between:1,15',
+            'seller.dv' => 'nullable|numeric|digits:1|dian_dv:'.$this->seller["identification_number"],
+            'seller.type_document_identification_id' => 'nullable|exists:type_document_identifications,id',
+            'seller.type_organization_id' => 'nullable|exists:type_organizations,id',
+            'seller.language_id' => 'nullable|exists:languages,id',
+            'seller.country_id' => 'nullable|exists:countries,id',
+            'seller.municipality_id' => 'nullable|exists:municipalities,id',
+            'seller.municipality_id_fact' => 'nullable|exists:municipalities,codefacturador',
+            'seller.type_regime_id' => 'nullable|exists:type_regimes,id',
+            'seller.tax_id' => 'nullable|exists:taxes,id',
+            'seller.type_liability_id' => 'nullable|exists:type_liabilities,id',
+            'seller.name' => 'required|string',
+            'seller.phone' => 'required|string|max:20',
+            'seller.address' => 'required|string',
+            'seller.email' => 'required|string|email',
+            'seller.merchant_registration' => 'required|string',
+            'seller.postal_zone_code' => 'required|numeric',
+            
+             // SMTP Server Parameters
             'smtp_parameters' => 'nullable|array',
             'smtp_parameters.host' => 'nullable|required_with:smtp_parameters|string',
             'smtp_parameters.port' => 'nullable|required_with:smtp_parameters|string',
@@ -156,11 +138,6 @@ class InvoiceRequest extends FormRequest
             'smtp_parameters.encryption' => 'nullable|required_with:smtp_parameters|string',
             'smtp_parameters.from_address' => 'nullable|required_with:smtp_parameters|string',
             'smtp_parameters.from_name' => 'nullable|required_with:smtp_parameters|string',
-
-            // Order Reference
-            'order_reference' => 'nullable|array',
-            'order_reference.id_order' => 'nullable|string',
-            'order_reference.issue_date_order' => 'nullable|date_format:Y-m-d',
 
             // Delivery
             'delivery' => 'nullable|array',
@@ -188,32 +165,6 @@ class InvoiceRequest extends FormRequest
             'deliveryparty.email' => 'nullable|required_with:deliveryparty|string|email',
             'deliveryparty.merchant_registration' => 'nullable|string',
 
-            // Health Fields
-            'health_fields' => 'nullable|array',
-            'health_fields.invoice_period_start_date' => 'nullable|required_with:health_fields|date_format:Y-m-d',
-            'health_fields.invoice_period_end_date' => 'nullable|required_with:health_fields|date_format:Y-m-d',
-            'health_fields.health_type_operation_id' => 'nullable|required_with:health_fields|exists:health_type_operations,id',
-            'health_fields.*.users_info' => 'nullable|array',
-            'health_fields.*.users_info.*.provider_code' => 'nullable|string',
-            'health_fields.*.users_info.*.health_type_document_identification_id' => 'nullable|exists:health_type_document_identifications,id',
-            'health_fields.*.users_info.*.identification_number' => 'nullable|alpha_num|between:3,16',
-            'health_fields.*.users_info.*.surname' => 'nullable|string',
-            'health_fields.*.users_info.*.second_surname' => 'nullable|string',
-            'health_fields.*.users_info.*.first_name' => 'nullable|string',
-            'health_fields.*.users_info.*.middle_name' => 'nullable|string',
-            'health_fields.*.users_info.*.health_type_user_id' => 'nullable|exists:health_type_users,id',
-            'health_fields.*.users_info.*.health_contracting_payment_method_id' => 'nullable|required_with:health_fields|exists:health_contracting_payment_methods,id',
-            'health_fields.*.users_info.*.health_coverage_id' => 'nullable|required_with:health_fields|exists:health_coverages,id',
-            'health_fields.*.users_info.*.autorization_numbers' => 'nullable|string',
-            'health_fields.*.users_info.*.mipres' => 'nullable|string',
-            'health_fields.*.users_info.*.mipres_delivery' => 'nullable|string',
-            'health_fields.*.users_info.*.contract_number' => 'nullable|string',
-            'health_fields.*.users_info.*.policy_number' => 'nullable|string',
-            'health_fields.*.users_info.*.co_payment' => 'nullable|numeric|min:0|not_in:0',
-            'health_fields.*.users_info.*.moderating_fee' => 'nullable|numeric|min:0|not_in:0',
-            'health_fields.*.users_info.*.recovery_fee' => 'nullable|numeric|min:0|not_in:0',
-            'health_fields.*.users_info.*.shared_payment' => 'nullable|numeric|min:0|not_in:0',
-
             // Payment form
             'payment_form' => 'nullable|array',
             'payment_form.payment_form_id' => 'nullable|exists:payment_forms,id',
@@ -232,7 +183,6 @@ class InvoiceRequest extends FormRequest
             // Tax totals
             'tax_totals' => 'nullable|array',
             'tax_totals.*.tax_id' => 'nullable|required_with:allowance_charges|exists:taxes,id',
-            'tax_totals.*.tax_name' => 'nullable|required_if:tax_totals.*.tax_id,15|string',
             'tax_totals.*.percent' => 'nullable|required_unless:tax_totals.*.tax_id,10|numeric',
             'tax_totals.*.tax_amount' => 'nullable|required_with:allowance_charges|numeric',
             'tax_totals.*.taxable_amount' => 'nullable|required_with:allowance_charges|numeric',
@@ -257,9 +207,6 @@ class InvoiceRequest extends FormRequest
             'prepaid_payment.receiveddate' => 'nullable|date_format:Y-m-d',
             'prepaid_payment.paiddate' => 'nullable|date_format:Y-m-d',
             'prepaid_payment.instructionid' => 'nullable|string',
-
-            // Previous Balance
-            'previous_balance' => 'nullable|numeric',
 
             // Legal monetary totals
             'legal_monetary_totals' => 'required|array',
@@ -286,7 +233,6 @@ class InvoiceRequest extends FormRequest
             'invoice_lines.*.allowance_charges.*.multiplier_factor_numeric' => 'nullable|required_if:invoice_lines.*.allowance_charges.*.charge_indicator,true|numeric',
             'invoice_lines.*.tax_totals' => 'nullable|array',
             'invoice_lines.*.tax_totals.*.tax_id' => 'nullable|required_with:invoice_lines.*.tax_totals|exists:taxes,id',
-            'invoice_lines.*.tax_totals.*.tax_name' => 'nullable|required_if:invoice_lines.*.tax_totals.*.tax_id,15|string',
             'invoice_lines.*.tax_totals.*.tax_amount' => 'nullable|required_with:invoice_lines.*.tax_totals|numeric',
             'invoice_lines.*.tax_totals.*.taxable_amount' => 'nullable|required_with:invoice_lines.*.tax_totals|numeric',
             'invoice_lines.*.tax_totals.*.percent' => 'nullable|required_unless:invoice_lines.*.tax_totals.*.tax_id,10|numeric',
@@ -299,6 +245,8 @@ class InvoiceRequest extends FormRequest
             'invoice_lines.*.type_item_identification_id' => 'required|exists:type_item_identifications,id',
             'invoice_lines.*.price_amount' => 'required|numeric',
             'invoice_lines.*.base_quantity' => 'required|numeric',
+            'invoice_lines.*.type_generation_transmition_id' => 'required|exists:type_generation_transmitions,id',
+            'invoice_lines.*.start_date' => 'required|date_format:Y-m-d',
         ];
     }
 }
