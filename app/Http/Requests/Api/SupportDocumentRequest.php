@@ -127,7 +127,7 @@ class SupportDocumentRequest extends FormRequest
             'seller.address' => 'required|string',
             'seller.email' => 'required|string|email',
             'seller.merchant_registration' => 'required|string',
-            'seller.postal_zone_code' => 'required|numeric',
+            'seller.postal_zone_code' => 'required|numeric', //codigo postal
             
              // SMTP Server Parameters
             'smtp_parameters' => 'nullable|array',
@@ -245,7 +245,7 @@ class SupportDocumentRequest extends FormRequest
             'invoice_lines.*.type_item_identification_id' => 'required|exists:type_item_identifications,id',
             'invoice_lines.*.price_amount' => 'required|numeric',
             'invoice_lines.*.base_quantity' => 'required|numeric',
-            'invoice_lines.*.type_generation_transmition_id' => 'required|exists:type_generation_transmitions,id',
+            'invoice_lines.*.type_generation_transmition_id' => 'required|exists:type_generation_transmitions,id', //por operacion o acumulacion hasta 6 dias.
             'invoice_lines.*.start_date' => 'required|date_format:Y-m-d',
         ];
     }
