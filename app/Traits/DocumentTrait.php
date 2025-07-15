@@ -109,8 +109,8 @@ trait DocumentTrait
     protected function createXML(array $data)
     {
         if($data['typeDocument']['code'] === '01' or $data['typeDocument']['code'] === '02' or $data['typeDocument']['code'] === '03' or $data['typeDocument']['code'] === '05' or $data['typeDocument']['code'] === '95' or $data['typeDocument']['code'] === '91' or $data['typeDocument']['code'] === '92' or $data['typeDocument']['code'] === '20' or $data['typeDocument']['code'] === '93' or $data['typeDocument']['code'] === '94'){
-            if($data['typeDocument']['code'] === '20' or $data['typeDocument']['code'] === '93' or $data['typeDocument']['code'] === '94'){
-                if($data['company']['eqdocs_type_environment_id'] == 2)
+            if($data['typeDocument']['code'] === '20' or $data['typeDocument']['code'] === '93' or $data['typeDocument']['code'] === '94'){ //si es documento equivalente electronico de etiquete POS o ND o NC al documneto equivalente
+                if($data['company']['eqdocs_type_environment_id'] == 2)  //tipo de ambiente para el documento equivalente o ND o NC del documento equivalente
                     $urlquery = 'https://catalogo-vpfe-hab.dian.gov.co';
                 else
                     $urlquery = 'https://catalogo-vpfe.dian.gov.co';

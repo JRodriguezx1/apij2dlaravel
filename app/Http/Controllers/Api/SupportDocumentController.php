@@ -213,103 +213,93 @@ class SupportDocumentController extends Controller
 
         $ar = new \DOMDocument;
 
-        //////////////////////////////////////// revisar ///////////////////////////////
         try{
-                $respuestadian = $sendBillSync->signToSend(storage_path("app/public/{$company->identification_number}/ReqDS-{$resolution->next_consecutive}.xml"))->getResponseToObject(storage_path("app/public/{$company->identification_number}/RptaDS-{$resolution->next_consecutive}.xml"));
-                if(isset($respuestadian->html))
-                    return [
-                        'success' => false,
-                        'message' => "El servicio DIAN no se encuentra disponible en el momento, reintente mas tarde..."
-                    ];
+            $respuestadian = $sendBillSync->signToSend(storage_path("app/public/{$company->identification_number}/ReqDS-{$resolution->next_consecutive}.xml"))->getResponseToObject(storage_path("app/public/{$company->identification_number}/RptaDS-{$resolution->next_consecutive}.xml"));
+            if(isset($respuestadian->html)){
+                return ['success' => false, 'message' => "El servicio de la DIAN no se encuentra disponible, intente mas tarde."];
+            }
 
-                if($respuestadian->Envelope->Body->SendBillSyncResponse->SendBillSyncResult->IsValid == 'true'){
-                    $filename = str_replace('ads', 'ad', str_replace('dse', 'ad', str_replace('nd', 'ad', str_replace('nc', 'ad', str_replace('fv', 'ad', $respuestadian->Envelope->Body->SendBillSyncResponse->SendBillSyncResult->XmlFileName)))));
-                    if($request->atacheddocument_name_prefix)
-                        $filename = $request->atacheddocument_name_prefix.$filename;
-                    $cufecude = $respuestadian->Envelope->Body->SendBillSyncResponse->SendBillSyncResult->XmlDocumentKey;
-                    $invoice_doc->state_document_id = 1;
-                    $invoice_doc->cufe = $cufecude;
-                    $invoice_doc->save();
-                    $signedxml = file_get_contents(storage_path("app/xml/{$company->id}/".$respuestadian->Envelope->Body->SendBillSyncResponse->SendBillSyncResult->XmlFileName.".xml"));
-//                    $xml->loadXML($signedxml);
-                    if(strpos($signedxml, "</Invoice>") > 0)
-                        $td = '/Invoice';
+            if($respuestadian->Envelope->Body->SendBillSyncResponse->SendBillSyncResult->IsValid == 'true'){
+                //nombre del attacheddocument colocando 'ad'
+                $filename = str_replace('ads', 'ad', str_replace('dse', 'ad', str_replace('nd', 'ad', str_replace('nc', 'ad', str_replace('fv', 'ad', $respuestadian->Envelope->Body->SendBillSyncResponse->SendBillSyncResult->XmlFileName)))));
+                if($request->atacheddocument_name_prefix)  //si se pasa el nombre para el attacheddocument
+                    $filename = $request->atacheddocument_name_prefix.$filename;
+                $cufecude = $respuestadian->Envelope->Body->SendBillSyncResponse->SendBillSyncResult->XmlDocumentKey;
+                //$invoice_doc->state_document_id = 1;
+                //$invoice_doc->cufe = $cufecude;
+                //$invoice_doc->save();
+
+                //Obtener XML firmado, partiendo del nombre de la respuesta de la Dian
+                $signedxml = file_get_contents(storage_path("app/xml/{$company->id}/".$respuestadian->Envelope->Body->SendBillSyncResponse->SendBillSyncResult->XmlFileName.".xml"));
+                if(strpos($signedxml, "</Invoice>") > 0) //busca el string "</Invoice>" en la variable $signedxml y devuelve la posicion de lo contrario devuelve false.
+                    $td = '/Invoice';
+                else
+                    if(strpos($signedxml, "</CreditNote>") > 0)
+                        $td = '/CreditNote';
                     else
-                        if(strpos($signedxml, "</CreditNote>") > 0)
-                            $td = '/CreditNote';
-                        else
-                            $td = '/DebitNote';
-                    $appresponsexml = base64_decode($respuestadian->Envelope->Body->SendBillSyncResponse->SendBillSyncResult->XmlBase64Bytes);
-                    $ar->loadXML($appresponsexml);
-                    $fechavalidacion = $ar->documentElement->getElementsByTagName('IssueDate')->item(0)->nodeValue;
-                    $horavalidacion = $ar->documentElement->getElementsByTagName('IssueTime')->item(0)->nodeValue;
-                    $document_number = $this->ValueXML($signedxml, $td."/cbc:ID/");
-                    // Create XML AttachedDocument
-                    $attacheddocument = $this->createXML(compact('user', 'company', 'seller', 'resolution', 'typeDocument', 'cufecude', 'signedxml', 'appresponsexml', 'fechavalidacion', 'horavalidacion', 'document_number'));
-                    // Signature XML
-                    $signAttachedDocument = new SignAttachedDocument($company->certificate->path, $company->certificate->password);
-                    $signAttachedDocument->GuardarEn = storage_path("app/public/{$company->identification_number}/{$filename}.xml");
+                        $td = '/DebitNote';
+                //Obtener XML en decodificado, partiendo de la respuesta de la Dian en base 64
+                $appresponsexml = base64_decode($respuestadian->Envelope->Body->SendBillSyncResponse->SendBillSyncResult->XmlBase64Bytes);
+                $ar->loadXML($appresponsexml); //cargar el xml decodificado en libreria DOMDocument
+                $fechavalidacion = $ar->documentElement->getElementsByTagName('IssueDate')->item(0)->nodeValue;
+                $horavalidacion = $ar->documentElement->getElementsByTagName('IssueTime')->item(0)->nodeValue;
+                $document_number = $this->ValueXML($signedxml, $td."/cbc:ID/"); // => ($signedxml, "/Invoice/cbc:ID/") ,  valueXML retorma: 12345 de <Invoice><cbc:ID>12345</cbc:ID></Invoice>
+                
+                // CreateXML AttachedDocument, es diferente al createXML de la factura que se envia a la Dian.
+                $attacheddocument = $this->createXML(compact('user', 'company', 'seller', 'resolution', 'typeDocument', 'cufecude', 'signedxml', 'appresponsexml', 'fechavalidacion', 'horavalidacion', 'document_number'));
+                
+                // Signature XML
+                $signAttachedDocument = new SignAttachedDocument($company->certificate->path, $company->certificate->password);
+                $signAttachedDocument->GuardarEn = storage_path("app/public/{$company->identification_number}/{$filename}.xml");
 
-                    $at = $signAttachedDocument->sign($attacheddocument)->xml;
-//                    $at = str_replace("&gt;", ">", str_replace("&quot;", '"', str_replace("&lt;", "<", $at)));
-                    $file = fopen(storage_path("app/public/{$company->identification_number}/{$filename}".".xml"), "w");
-//                    $file = fopen(storage_path("app/public/{$company->identification_number}/Attachment-".$this->valueXML($signedxml, $td."/cbc:ID/").".xml"), "w");
-                    fwrite($file, $at);
-                    fclose($file);
-                    if(isset($request->annexes))
-                        $this->saveAnnexes($request->annexes, $filename);
-                    $invoice = Document::where('identification_number', '=', $company->identification_number)
-                                       ->where('customer', '=', $seller->company->identification_number)
-                                       ->where('prefix', '=', $this->ValueXML($signedxml, $td."/cac:AccountingSupplierParty/cac:Party/cac:PartyLegalEntity/cac:CorporateRegistrationScheme/cbc:ID/"))
-                                       ->where('number', '=', str_replace($this->ValueXML($signedxml, $td."/cac:AccountingSupplierParty/cac:Party/cac:PartyLegalEntity/cac:CorporateRegistrationScheme/cbc:ID/"), '', $this->ValueXML($signedxml, $td."/cbc:ID/")))
-                                       ->where('state_document_id', '=', 1)->get();
-                    if(isset($request->sendmail)){
-                        if($request->sendmail){
-                            if(count($invoice) > 0 && $seller->company->identification_number != '222222222222'){
-                                try{
-                                    Mail::to($seller->email)->send(new InvoiceMail($invoice, $seller, $company, FALSE, FALSE, $filename, TRUE));
-                                    if($request->sendmailtome)
-                                        Mail::to($user->email)->send(new InvoiceMail($invoice, $seller, $company, FALSE, FALSE, $filename, FALSE));
-                                    if($request->email_cc_list){
-                                        foreach($request->email_cc_list as $email)
-                                            Mail::to($email)->send(new InvoiceMail($invoice, $seller, $company, FALSE, FALSE, $filename, FALSE));
-                                    }
-                                    $invoice[0]->send_email_success = 1;
-                                    $invoice[0]->send_email_date_time = Carbon::now()->format('Y-m-d H:i');
-                                    $invoice[0]->save();
-                                } catch (\Exception $m) {
-                                    \Log::debug($m->getMessage());
-                                }
+                $at = $signAttachedDocument->sign($attacheddocument)->xml; //firma del attacheddocument
+                $file = fopen(storage_path("app/public/{$company->identification_number}/{$filename}".".xml"), "w"); //El archivo es abierto para escritura, si el archivo no existe, lo crea. si ya existe el archivo, su contenido se borra para sobreescribir
+                fwrite($file, $at);  //escribirá desde cero, empezando con un archivo vacío.
+                fclose($file); //cerrar archivo para liberar recursos
+                if(isset($request->sendmail)){
+                    if($request->sendmail){
+                        if($seller->company->identification_number != '222222222222'){
+                            try{
+                                //Enviar email de la factura documento soporte al cliente.
+
+                                Mail::to($seller->email)->send(new InvoiceMail($invoice, $seller, $company, FALSE, FALSE, $filename, TRUE));
+                                //enviar email de la factura documento soporte a mi o negocio
+                                if($request->sendmailtome)
+                                    Mail::to($user->email)->send(new InvoiceMail($invoice, $seller, $company, FALSE, FALSE, $filename, FALSE));  
+                            } catch (\Exception $m) {
+                                \Log::debug($m->getMessage());
                             }
                         }
                     }
                 }
-                else{
-                  $invoice = null;
-                  $at = '';
-                }
-            } catch (\Exception $e) {
-                return $e->getMessage().' '.preg_replace("/[\r\n|\n|\r]+/", "", json_encode($respuestadian));
+
+            }else{
+                $invoice = null;
+                $at = '';
             }
-            return [
-                'message' => "{$typeDocument->name} #{$resolution->next_consecutive} generada con éxito",
-                'send_email_success' => (null !== $invoice && $request->sendmail == true) ?? $invoice[0]->send_email_success == 1,
-                'send_email_date_time' => (null !== $invoice && $request->sendmail == true) ?? Carbon::now()->format('Y-m-d H:i'),
-                'ResponseDian' => $respuestadian,
-                'invoicexml'=>base64_encode(file_get_contents(storage_path("app/public/{$company->identification_number}/DSS-{$resolution->next_consecutive}.xml"))),
-                'zipinvoicexml'=>base64_encode(file_get_contents(storage_path("app/public/{$company->identification_number}/DSS-{$resolution->next_consecutive}.zip"))),
-                'unsignedinvoicexml'=>base64_encode(file_get_contents(storage_path("app/public/{$company->identification_number}/DS-{$resolution->next_consecutive}.xml"))),
-                'reqfe'=>base64_encode(file_get_contents(storage_path("app/public/{$company->identification_number}/ReqDS-{$resolution->next_consecutive}.xml"))),
-                'rptafe'=>base64_encode(file_get_contents(storage_path("app/public/{$company->identification_number}/RptaDS-{$resolution->next_consecutive}.xml"))),
-                'attacheddocument'=>base64_encode($at),
-                'urlinvoicexml'=>"DSS-{$resolution->next_consecutive}.xml",
-                'urlinvoicepdf'=>"DSS-{$resolution->next_consecutive}.pdf",
-                'urlinvoiceattached'=>"{$filename}.xml",
-                'cuds' => $signInvoice->ConsultarCUDS(),
-                'QRStr' => $QRStr,
-                'certificate_days_left' => $certificate_days_left,
-                'resolution_days_left' => $this->days_between_dates(Carbon::now()->format('Y-m-d'), $resolution->date_to),
-            ];
+        } catch (\Exception $e) {
+            return $e->getMessage().' '.preg_replace("/[\r\n|\n|\r]+/", "", json_encode($respuestadian));
+        }
+        $invoice = null;
+        return [
+            'message' => "{$typeDocument->name} #{$resolution->next_consecutive} generada con éxito",
+            'send_email_success' => (null !== $invoice && $request->sendmail == true) ?? $invoice[0]->send_email_success == 1,
+            'send_email_date_time' => (null !== $invoice && $request->sendmail == true) ?? Carbon::now()->format('Y-m-d H:i'),
+            'ResponseDian' => $respuestadian,
+            //'invoicexml'=>base64_encode(file_get_contents(storage_path("app/public/{$company->identification_number}/DSS-{$resolution->next_consecutive}.xml"))),
+            //'zipinvoicexml'=>base64_encode(file_get_contents(storage_path("app/public/{$company->identification_number}/DSS-{$resolution->next_consecutive}.zip"))),
+            //'unsignedinvoicexml'=>base64_encode(file_get_contents(storage_path("app/public/{$company->identification_number}/DS-{$resolution->next_consecutive}.xml"))),
+            //'reqfe'=>base64_encode(file_get_contents(storage_path("app/public/{$company->identification_number}/ReqDS-{$resolution->next_consecutive}.xml"))),
+            //'rptafe'=>base64_encode(file_get_contents(storage_path("app/public/{$company->identification_number}/RptaDS-{$resolution->next_consecutive}.xml"))),
+            //'attacheddocument'=>base64_encode($at),
+            'urlinvoicexml'=>"DSS-{$resolution->next_consecutive}.xml",
+            'urlinvoicepdf'=>"DSS-{$resolution->next_consecutive}.pdf",
+            'urlinvoiceattached'=>"{$filename}.xml",
+            'cuds' => $signInvoice->ConsultarCUDS(),
+            'QRStr' => $QRStr,
+            'certificate_days_left' => $certificate_days_left,
+            'resolution_days_left' => $this->days_between_dates(Carbon::now()->format('Y-m-d'), $resolution->date_to),
+        ];
     }
 
 
