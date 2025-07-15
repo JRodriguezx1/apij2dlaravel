@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\ConfigurationController;
 use App\Http\Controllers\Api\CreditNoteController;
 use App\Http\Controllers\Api\InvoiceController;
+use App\Http\Controllers\Api\sdCreditNoteController;
 use App\Http\Controllers\Api\StateController;
 use App\Http\Controllers\Api\SupportDocumentController;
 
@@ -59,9 +60,16 @@ Route::middleware('auth.token')->group(function(){
             Route::post('/', [CreditNoteController::class, 'store']); //
         });
 
+        //documento soporte
         Route::prefix('/support-document')->group(function(){
             Route::post('/{testSetId}', [SupportDocumentController::class, 'testSetStore']);  //enviar un documento soporte en modo habilitacion
             Route::post('/', [SupportDocumentController::class, 'store']); //enviar un documento soporte
+        });
+
+        //nota credito del documento soporte
+        Route::prefix('/sd-credit-note')->group(function(){
+            Route::post('/{testSetId}', [sdCreditNoteController::class, 'testSetStore']);  //enviar una nc de documento soporte en modo habilitacion
+            Route::post('/', [sdCreditNoteController::class, 'store']); //enviar una nc de documento soporte
         });
 
         //Status
