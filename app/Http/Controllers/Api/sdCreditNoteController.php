@@ -4,10 +4,35 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\sdCreditNoteRequest;
+use App\Models\AllowanceCharge;
+use App\Models\BillingReference;
+use App\Models\Company;
+use App\Models\HealthField;
+use App\Models\LegalMonetaryTotal;
+use App\Models\Municipality;
+use App\Models\OrderReference;
+use App\Models\PaymentForm;
+use App\Models\PaymentMethod;
+use App\Models\TaxTotal;
+use App\Models\TypeCurrency;
+use App\Models\TypeDocument;
+use App\Models\TypeOperation;
+use App\Models\User;
+use App\Models\Document;
+use App\Models\InvoiceLine as CreditNoteLine;
 use Illuminate\Http\Request;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\InvoiceMail;
+use App\Traits\DocumentTrait;
+use ubl21dian\Templates\SOAP\SendBillSync;
+use ubl21dian\Templates\SOAP\SendTestSetAsync;
+use ubl21dian\XAdES\SignAttachedDocument;
+use ubl21dian\XAdES\SignCreditNote;
 
 class sdCreditNoteController extends Controller
 {
+    use DocumentTrait;
     //
     public function store(sdCreditNoteRequest $request)
     {
