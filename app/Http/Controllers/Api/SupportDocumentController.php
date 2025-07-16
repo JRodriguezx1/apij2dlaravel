@@ -206,7 +206,7 @@ class SupportDocumentController extends Controller
         }else{ $sendBillSync->contentFile = $this->zipBase64($company, $resolution, $signInvoice->sign($invoice), storage_path("app/public/{$company->identification_number}/DSS-{$resolution->next_consecutive}")); }
 
         $QRStr = $this->createPDF($user, $company, $seller, $typeDocument, $resolution, $date, $time, $paymentForm, $request, $signInvoice->ConsultarCUDS(), "SUPPORTDOCUMENT", $withHoldingTaxTotal, $notes, $healthfields);
-
+                                                                                                            //$request contiene los linesinvoice
         $filename = '';
         $respuestadian = '';
         $typeDocument = TypeDocument::findOrFail(7); //tipo de documento es AttachedDocument code = 89, prefix = at
