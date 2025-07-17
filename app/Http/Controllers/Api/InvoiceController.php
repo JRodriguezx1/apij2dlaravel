@@ -48,7 +48,7 @@ class InvoiceController extends Controller
         //obtener compañia
         $company = $user->company;
 
-         //Verifica certificado
+        //Verifica certificado
         $certificate_days_left = 0;
         $c = $this->verify_certificate();
         if(!$c['success']){
@@ -89,8 +89,7 @@ class InvoiceController extends Controller
         }
 
         // Type operation id
-        if(!$request->type_operation_id)
-          $request->type_operation_id = 10;
+        if(!$request->type_operation_id)$request->type_operation_id = 10;
         $typeoperation = TypeOperation::findOrFail($request->type_operation_id);
 
         // Currency id
@@ -198,25 +197,21 @@ class InvoiceController extends Controller
         $signInvoice->technicalKey = $resolution->technical_key;
 
         //Crear direccion para guardar el archivo xml
-        if ($request->GuardarEn){
-            if (!is_dir($request->GuardarEn)) {
-                mkdir($request->GuardarEn);
-            }
+        /*if($request->GuardarEn){
+            if (!is_dir($request->GuardarEn))mkdir($request->GuardarEn);
             $signInvoice->GuardarEn = $request->GuardarEn."\\FE-{$resolution->next_consecutive}.xml"; //obtiene el valor del campo virtual next_consecutive por medio de getNextConsecutiveAttribute
-        }
-        else{
-            if (!is_dir(storage_path("app/public/{$company->identification_number}"))) {
+        }else{*/
+            if (!is_dir(storage_path("app/public/{$company->identification_number}")))
                 mkdir(storage_path("app/public/{$company->identification_number}"));
-            }
             $signInvoice->GuardarEn = storage_path("app/public/{$company->identification_number}/FE-{$resolution->next_consecutive}.xml");  //direccion local para guardar el archivo xml signInvoice->GuardarEn = app/public/1094955142/FE-SETUP994411000.xml
-        }
+        /*}*/
 
         $sendBillSync = new SendBillSync($company->certificate->path, $company->certificate->password);
         $sendBillSync->To = $company->software->url;
         $sendBillSync->fileName = "{$resolution->next_consecutive}.xml";
-        if ($request->GuardarEn){
+        /*if ($request->GuardarEn){
             $sendBillSync->contentFile = $this->zipBase64($company, $resolution, $signInvoice->sign($invoice), $request->GuardarEn."\\FES-{$resolution->next_consecutive}");
-        }else{ $sendBillSync->contentFile = $this->zipBase64($company, $resolution, $signInvoice->sign($invoice), storage_path("app/public/{$company->identification_number}/FES-{$resolution->next_consecutive}")); }
+        }else{*/ $sendBillSync->contentFile = $this->zipBase64($company, $resolution, $signInvoice->sign($invoice), storage_path("app/public/{$company->identification_number}/FES-{$resolution->next_consecutive}")); /*}*/
 
         $QRStr = $this->createPDF($user, $company, $customer, $typeDocument, $resolution, $date, $time, $paymentForm, $request, $signInvoice->ConsultarCUFE(), "INVOICE", $withHoldingTaxTotal, $notes, $healthfields);
 

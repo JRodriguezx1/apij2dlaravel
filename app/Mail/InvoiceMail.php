@@ -57,8 +57,8 @@ class InvoiceMail extends Mailable
 
     public function build()
     {
-        if($this->GuardarEn)
-            if($this->PDFAlternativo)
+        if($this->GuardarEn){
+            if($this->PDFAlternativo){
                 if(env('MAIL_USERNAME') and $this->user->validate_mail_server() == false){
                     if($this->filename)
                         $nameZIP = $this->zipEmail($this->GuardarEn."\\{$this->filename}.xml", $this->GuardarEn."\\PDF-{$this->invoice[0]->prefix}{$this->invoice[0]->number}.pdf");
@@ -77,7 +77,7 @@ class InvoiceMail extends Mailable
                                                     ->from(Config::get('mail.from.address'), Config::get('mail.from.name'))
                                                     ->attach($nameZIP);
                 }
-            else
+            }else{
                 if(env('MAIL_USERNAME') and $this->user->validate_mail_server() == false){
                     if($this->filename)
                         $nameZIP = $this->zipEmail($this->GuardarEn."\\{$this->filename}.xml", $this->GuardarEn."\\".$this->invoice[0]->pdf);
@@ -96,8 +96,9 @@ class InvoiceMail extends Mailable
                                                     ->from(Config::get('mail.from.address'), Config::get('mail.from.name'))
                                                     ->attach($nameZIP);
                 }
-        else
-            if($this->PDFAlternativo)
+            }
+        }else{
+            if($this->PDFAlternativo){
                 if(env('MAIL_USERNAME') and $this->user->validate_mail_server() == false){
                     if($this->filename)
                         $nameZIP = $this->zipEmail(storage_path("app/public/{$this->company->identification_number}/{$this->filename}.xml"), storage_path("app/public/{$this->company->identification_number}/PDF-{$this->invoice[0]->prefix}{$this->invoice[0]->number}.pdf"));
@@ -116,7 +117,7 @@ class InvoiceMail extends Mailable
                                                     ->from(Config::get('mail.from.address'), Config::get('mail.from.name'))
                                                     ->attach($nameZIP);
                 }
-            else{
+            }else{
                 if(env('MAIL_USERNAME') and $this->user->validate_mail_server() == false){
                     if($this->filename)
                         $nameZIP = $this->zipEmail(storage_path("app/public/{$this->company->identification_number}/{$this->filename}.xml"), storage_path("app/public/{$this->company->identification_number}/{$this->invoice[0]->pdf}"));
@@ -136,5 +137,6 @@ class InvoiceMail extends Mailable
                                                     ->attach($nameZIP);
                 }
             }
+        }
     }
 }

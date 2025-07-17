@@ -97,7 +97,7 @@ class InvoiceRequest extends FormRequest
             //'send_customer_credentials' => 'nullable|boolean',
 
             // Nombre Archivo
-            'GuardarEn' => 'nullable|string',
+            //'GuardarEn' => 'nullable|string',
 
             // Document
             'type_document_id' => [
@@ -149,14 +149,14 @@ class InvoiceRequest extends FormRequest
             'customer.merchant_registration' => 'nullable|string',
 
             // SMTP Server Parameters
-            'smtp_parameters' => 'nullable|array',
+            /*'smtp_parameters' => 'nullable|array',
             'smtp_parameters.host' => 'nullable|required_with:smtp_parameters|string',
             'smtp_parameters.port' => 'nullable|required_with:smtp_parameters|string',
             'smtp_parameters.username' => 'nullable|required_with:smtp_parameters|string',
             'smtp_parameters.password' => 'nullable|required_with:smtp_parameters|string',
             'smtp_parameters.encryption' => 'nullable|required_with:smtp_parameters|string',
             'smtp_parameters.from_address' => 'nullable|required_with:smtp_parameters|string',
-            'smtp_parameters.from_name' => 'nullable|required_with:smtp_parameters|string',
+            'smtp_parameters.from_name' => 'nullable|required_with:smtp_parameters|string',*/
 
             // Order Reference
             'order_reference' => 'nullable|array',
