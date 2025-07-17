@@ -38,10 +38,10 @@ use ubl21dian\Templates\SOAP\SendTestSetAsync;
 
 class SupportDocumentController extends Controller
 {
+    use DocumentTrait;
     //
     public function store(SupportDocumentRequest $request)
     {
-        return "hola";
         //obtener usuario
         $user = auth()->user();
         //obtener compañia

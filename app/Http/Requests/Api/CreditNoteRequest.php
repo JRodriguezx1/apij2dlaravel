@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Api;
 
 use Illuminate\Foundation\Http\FormRequest;
+use App\Rules\DianDvRule;
 
 class CreditNoteRequest extends FormRequest
 {
@@ -153,7 +154,7 @@ class CreditNoteRequest extends FormRequest
             // Customer
             'customer' => 'required|array',
             'customer.identification_number' => 'required|alpha_num|between:1,15',
-            'customer.dv' => 'nullable|numeric|digits:1|dian_dv:'.$this->customer["identification_number"],
+            'customer.dv' => ['nullable', 'numeric', 'digits:1', new DianDvRule($this->customer["identification_number"])], //'nullable|numeric|digits:1|dian_dv:'.$this->customer["identification_number"],
             'customer.type_document_identification_id' => 'nullable|exists:type_document_identifications,id',
             'customer.type_organization_id' => 'nullable|exists:type_organizations,id',
             'customer.language_id' => 'nullable|exists:languages,id',

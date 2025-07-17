@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Api;
 
 use Illuminate\Foundation\Http\FormRequest;
+use App\Rules\DianDvRule;
 
 class SupportDocumentRequest extends FormRequest
 {
@@ -86,7 +87,7 @@ class SupportDocumentRequest extends FormRequest
             // Document
             'type_document_id' => [
                 'required',
-                'in:1',
+                'in:11',
                 'exists:type_documents,id',
                 //new ResolutionSetting(),
             ],
@@ -102,7 +103,7 @@ class SupportDocumentRequest extends FormRequest
             'notes' => 'nullable|string',
 
             // Tipo operacion
-            'type_operation_id' => 'nullable|numeric|exists:type_operations',
+            'type_operation_id' => 'nullable|in:23,24',
 
             // Id moneda negociacion
             'idcurrency' => 'nullable|integer|exists:type_currencies,id',
@@ -112,7 +113,7 @@ class SupportDocumentRequest extends FormRequest
             // Seller
             'seller' => 'required|array',
             'seller.identification_number' => 'required|alpha_num|between:1,15',
-            'seller.dv' => 'nullable|numeric|digits:1|dian_dv:'.$this->seller["identification_number"],
+            'seller.dv' => ['nullable', 'numeric', 'digits:1', new DianDvRule($this->seller["identification_number"])], //'nullable|numeric|digits:1|dian_dv:'.$this->seller["identification_number"],
             'seller.type_document_identification_id' => 'nullable|exists:type_document_identifications,id',
             'seller.type_organization_id' => 'nullable|exists:type_organizations,id',
             'seller.language_id' => 'nullable|exists:languages,id',
@@ -130,14 +131,14 @@ class SupportDocumentRequest extends FormRequest
             'seller.postal_zone_code' => 'required|numeric', //codigo postal
             
              // SMTP Server Parameters
-            'smtp_parameters' => 'nullable|array',
-            'smtp_parameters.host' => 'nullable|required_with:smtp_parameters|string',
-            'smtp_parameters.port' => 'nullable|required_with:smtp_parameters|string',
-            'smtp_parameters.username' => 'nullable|required_with:smtp_parameters|string',
-            'smtp_parameters.password' => 'nullable|required_with:smtp_parameters|string',
-            'smtp_parameters.encryption' => 'nullable|required_with:smtp_parameters|string',
-            'smtp_parameters.from_address' => 'nullable|required_with:smtp_parameters|string',
-            'smtp_parameters.from_name' => 'nullable|required_with:smtp_parameters|string',
+            //'smtp_parameters' => 'nullable|array',
+            //'smtp_parameters.host' => 'nullable|required_with:smtp_parameters|string',
+            //'smtp_parameters.port' => 'nullable|required_with:smtp_parameters|string',
+            //'smtp_parameters.username' => 'nullable|required_with:smtp_parameters|string',
+            //'smtp_parameters.password' => 'nullable|required_with:smtp_parameters|string',
+            //'smtp_parameters.encryption' => 'nullable|required_with:smtp_parameters|string',
+            //'smtp_parameters.from_address' => 'nullable|required_with:smtp_parameters|string',
+            //'smtp_parameters.from_name' => 'nullable|required_with:smtp_parameters|string',
 
             // Delivery
             'delivery' => 'nullable|array',
