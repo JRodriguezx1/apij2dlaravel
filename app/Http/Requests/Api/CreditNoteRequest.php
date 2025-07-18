@@ -53,7 +53,7 @@ class CreditNoteRequest extends FormRequest
             'establishment_logo' => 'nullable|string',
 
             // Prefijo del Nombre del AttachedDocument
-            'atacheddocument_name_prefix' => 'nullable|string',
+            //'atacheddocument_name_prefix' => 'nullable|string',
 
             // Regimen SEZE
             'seze' => 'nullable|string',  // Cadena indicando año de inicio regimen SEZE y año de formacion de sociedad separados por guion Ejemplo 2021-2017
@@ -68,25 +68,25 @@ class CreditNoteRequest extends FormRequest
             // Enviar Correo al Adquiriente
             'sendmail' => 'nullable|boolean',
             'sendmailtome' => 'nullable|boolean',
-            'send_customer_credentials' => 'nullable|boolean',
+            //'send_customer_credentials' => 'nullable|boolean',
 
             // Lista de correos a enviar copia
             'email_cc_list' => 'nullable|array',
             'email_cc_list.*.email' => 'nullable|required_with:email_cc_list,|string|email',
 
             // Documentos en base64 para adjuntar en el attacheddocument
-            'annexes' => 'nullable|array',
-            'annexes.*.document' => 'nullable|required_with:annexes|string',
-            'annexes.*.extension' => 'nullable|required_with:annexes|string',
+            //'annexes' => 'nullable|array',
+            //'annexes.*.document' => 'nullable|required_with:annexes|string',
+            //'annexes.*.extension' => 'nullable|required_with:annexes|string',
 
             // HTML string body email
-            'html_header' => 'nullable|string',
-            'html_body' => 'nullable|string',
-            'html_buttons' => 'nullable|string',
-            'html_footer' => 'nullable|string',
+            //'html_header' => 'nullable|string',
+            //'html_body' => 'nullable|string',
+            //'html_buttons' => 'nullable|string',
+            //'html_footer' => 'nullable|string',
 
             // Nombre Archivo
-            'GuardarEn' => 'nullable|string',
+            //'GuardarEn' => 'nullable|string',
 
             // Document
             'type_document_id' => [
@@ -174,14 +174,14 @@ class CreditNoteRequest extends FormRequest
             'customer.merchant_registration' => 'nullable|string',
 
             // SMTP Server Parameters
-            'smtp_parameters' => 'nullable|array',
+            /*'smtp_parameters' => 'nullable|array',
             'smtp_parameters.host' => 'nullable|required_with:smtp_parameters|string',
             'smtp_parameters.port' => 'nullable|required_with:smtp_parameters|string',
             'smtp_parameters.username' => 'nullable|required_with:smtp_parameters|string',
             'smtp_parameters.password' => 'nullable|required_with:smtp_parameters|string',
             'smtp_parameters.encryption' => 'nullable|required_with:smtp_parameters|string',
             'smtp_parameters.from_address' => 'nullable|required_with:smtp_parameters|string',
-            'smtp_parameters.from_name' => 'nullable|required_with:smtp_parameters|string',
+            'smtp_parameters.from_name' => 'nullable|required_with:smtp_parameters|string',*/
 
             // Invoice Period
             'invoice_period' => 'nullable|required_if:type_operation_id,=,8|array',

@@ -23,6 +23,8 @@ use App\Models\InvoicePeriod;
 use App\Models\InvoiceLine as CreditNoteLine;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\InvoiceMail;
 use App\Traits\DocumentTrait;
 use ubl21dian\Templates\SOAP\SendBillSync;
 use ubl21dian\Templates\SOAP\SendTestSetAsync;
@@ -72,8 +74,7 @@ class CreditNoteController extends Controller
         $customer->company = new Company($customerAll->toArray());
 
         // Type operation id
-        if(!$request->type_operation_id)
-          $request->type_operation_id = 12;
+        if(!$request->type_operation_id)$request->type_operation_id = 12;
         $typeoperation = TypeOperation::findOrFail($request->type_operation_id);
 
         // Currency id
@@ -204,18 +205,14 @@ class CreditNoteController extends Controller
         }
          
         //Crear direccion para guardar el archivo xml
-        if ($request->GuardarEn){
-            if (!is_dir($request->GuardarEn)) {
-                mkdir($request->GuardarEn);
-            }
+        /*if ($request->GuardarEn){
+            if (!is_dir($request->GuardarEn))mkdir($request->GuardarEn);
             $signCreditNote->GuardarEn = $request->GuardarEn."\\{$pf}-{$resolution->next_consecutive}.xml"; //obtiene el valor del campo virtual next_consecutive por medio de getNextConsecutiveAttribute.
-        }
-        else{
-            if (!is_dir(storage_path("app/public/{$company->identification_number}"))) {
+        }else{*/
+            if(!is_dir(storage_path("app/public/{$company->identification_number}")))
                 mkdir(storage_path("app/public/{$company->identification_number}"));
-            }
             $signCreditNote->GuardarEn = storage_path("app/public/{$company->identification_number}/{$pf}-{$resolution->next_consecutive}.xml");  //direccion local para guardar el archivo xml signInvoice->GuardarEn = app/public/1094955142/FE-SETUP994411000.xml
-        }
+        /*}*/
 
         $sendBillSync = new SendBillSync($company->certificate->path, $company->certificate->password);
         if($is_eqdoc) //si es documento equivalente
@@ -225,11 +222,9 @@ class CreditNoteController extends Controller
 
         $sendBillSync->fileName = "{$resolution->next_consecutive}.xml";
         
-        if ($request->GuardarEn){
+        /*if ($request->GuardarEn){
             $sendBillSync->contentFile = $this->zipBase64($company, $resolution, $signCreditNote->sign($crediNote), $request->GuardarEn."\\{$pfs}-{$resolution->next_consecutive}");
-        }else{
-            $sendBillSync->contentFile = $this->zipBase64($company, $resolution, $signCreditNote->sign($crediNote), storage_path("app/public/{$company->identification_number}/{$pfs}-{$resolution->next_consecutive}"));
-        }
+        }else{*/ $sendBillSync->contentFile = $this->zipBase64($company, $resolution, $signCreditNote->sign($crediNote), storage_path("app/public/{$company->identification_number}/{$pfs}-{$resolution->next_consecutive}"));/*}*/
 
         $QRStr = $this->createPDF($user, $company, $customer, $typeDocument, $resolution, $date, $time, $paymentForm, $request, $signCreditNote->ConsultarCUDE(), "NC", $withHoldingTaxTotal, $notes, $healthfields);
 
@@ -247,8 +242,8 @@ class CreditNoteController extends Controller
             if($respuestadian->Envelope->Body->SendBillSyncResponse->SendBillSyncResult->IsValid == 'true'){
                 //nombre del attacheddocument colocando 'ad'
                 $filename = str_replace('nc', 'ad', str_replace('ads', 'ad', str_replace('dse', 'ad', str_replace('ni', 'ad', str_replace('nd', 'ad', str_replace('ncq', 'ad', str_replace('fv', 'ad', $respuestadian->Envelope->Body->SendBillSyncResponse->SendBillSyncResult->XmlFileName)))))));
-                if($request->atacheddocument_name_prefix)
-                    $filename = $request->atacheddocument_name_prefix.$filename;
+                /*if($request->atacheddocument_name_prefix) //si se pasa el nombre para el attacheddocument
+                    $filename = $request->atacheddocument_name_prefix.$filename;*/
                 $cufecude = $respuestadian->Envelope->Body->SendBillSyncResponse->SendBillSyncResult->XmlDocumentKey;
                 //$invoice_doc->state_document_id = 1;
                 //$invoice_doc->cufe = $cufecude;
@@ -283,17 +278,15 @@ class CreditNoteController extends Controller
                 fclose($file); //cerrar archivo para liberar recursos
                 if(isset($request->sendmail)){ //Valida que el email del cliente este presente
                     if($request->sendmail){
-                        if($customer->company->identification_number != '222222222222'){
-                            try{
-                                //Enviar email de la factura al cliente consumidor
-                                
-                                Mail::to($customer->email)->send(new InvoiceMail($invoice, $customer, $company, FALSE, FALSE, $filename, TRUE, $request));
-                                //enviar email de la factura a mi o negocio
-                                if($request->sendmailtome)
-                                    Mail::to($user->email)->send(new InvoiceMail($invoice, $customer, $company, FALSE, FALSE, $filename, FALSE, $request));
-                            } catch (\Exception $m) {
-                                \Log::debug($m->getMessage());
-                            }
+                        try{
+                            //Enviar email de la factura al cliente consumidor
+                            
+                            Mail::to($customer->email)->send(new InvoiceMail($invoice, $customer, $company, FALSE, FALSE, $filename, TRUE, $request));
+                            //enviar email de la factura a mi o negocio
+                            if($request->sendmailtome)
+                                Mail::to($user->email)->send(new InvoiceMail($invoice, $customer, $company, FALSE, FALSE, $filename, FALSE, $request));
+                        } catch (\Exception $m) {
+                            \Log::debug($m->getMessage());
                         }
                     }
                 }

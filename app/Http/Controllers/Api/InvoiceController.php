@@ -181,7 +181,6 @@ class InvoiceController extends Controller
         $legalMonetaryTotals = new LegalMonetaryTotal($request->legal_monetary_totals);
 
         // Invoice lines
-
         $invoiceLines = collect();
         foreach ($request->invoice_lines as $invoiceLine) {
             $invoiceLines->push(new InvoiceLine($invoiceLine));
@@ -250,8 +249,8 @@ class InvoiceController extends Controller
             if($respuestadian->Envelope->Body->SendBillSyncResponse->SendBillSyncResult->IsValid == 'true'){
                 //nombre del attacheddocument colocando 'ad'
                 $filename = str_replace('nd', 'ad', str_replace('nc', 'ad', str_replace('fv', 'ad', $respuestadian->Envelope->Body->SendBillSyncResponse->SendBillSyncResult->XmlFileName)));
-                if($request->atacheddocument_name_prefix)  //si se pasa el nombre para el attacheddocument
-                    $filename = $request->atacheddocument_name_prefix.$filename;
+                //if($request->atacheddocument_name_prefix)  //si se pasa el nombre para el attacheddocument
+                    //$filename = $request->atacheddocument_name_prefix.$filename;
                 $cufecude = $respuestadian->Envelope->Body->SendBillSyncResponse->SendBillSyncResult->XmlDocumentKey;
                 //$invoice_doc->state_document_id = 1;
                 //$invoice_doc->cufe = $cufecude;
